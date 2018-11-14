@@ -56,4 +56,5 @@ def capture_image():
     camera.stop_preview()
 
 
-capture_samples()
+if __name__ == '__main__':
+    capture_samples()
