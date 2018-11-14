@@ -6,6 +6,7 @@ from .image_to_temperature import TemperatureReader
 
 cycle_interval = 120    # Cycle interval in sec
 samples_limit = 1000    # number of samples to capture
+bad_images_limit = 10
 
 capture_image_path = os.path.join('images', 'captured', 'temp.jpg')
 camera = PiCamera()
@@ -25,7 +26,15 @@ def capture_samples():
         if reader.ok_images_count >= samples_limit:
             capture_elapsed_time = time() - capture_start_time
             formatted_time = strftime("%d [days] : %H [h] : %M [min] : %S [sec]", capture_elapsed_time)
-            print("Capturing complete. Elapsed time:")
+            print("Capturing successfully complete. Elapsed time:")
+            print(formatted_time)
+            reader.show_stats()
+            return
+
+        if reader.bad_images_count >= bad_images_limit:
+            capture_elapsed_time = time() - capture_start_time
+            formatted_time = strftime("%d [days] : %H [h] : %M [min] : %S [sec]", capture_elapsed_time)
+            print("Reached limit of bad samples. Aborting operation.  Elapsed time:")
             print(formatted_time)
             reader.show_stats()
             return
