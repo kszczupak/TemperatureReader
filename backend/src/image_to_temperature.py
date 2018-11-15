@@ -19,6 +19,7 @@ class TemperatureReader:
         self.second_digit = None
         self.bad_images_count = 0
         self.ok_images_count = 0
+        self._base_path = os.path.dirname(os.path.abspath(__file__))
 
     def process_image(self, image_path):
         self.temperature_image = self.fetch_temperature(image_path)
@@ -99,9 +100,9 @@ class TemperatureReader:
 
         return morphology.remove_small_objects(opened_image, min_size=100)
 
-    @staticmethod
-    def save_image(image, path):
-        io.imsave(path, image)
+    def save_image(self, image, relative_path):
+        full_path = os.path.join(self._base_path, relative_path)
+        io.imsave(full_path, image)
 
     def _fetch_temperature_digits(self):
         labeled_image = measure.label(self.temperature_image)

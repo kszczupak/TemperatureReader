@@ -10,7 +10,8 @@ cycle_interval = 120    # Cycle interval in sec
 samples_limit = 10    # number of samples to capture
 bad_images_limit = 10
 
-capture_image_path = os.path.join('images', 'captured', 'temp.jpg')
+script_path = os.path.dirname(os.path.abspath(__file__))
+capture_image_path = os.path.join(script_path, 'images', 'captured', 'temp.jpg')
 camera = PiCamera()
 
 
