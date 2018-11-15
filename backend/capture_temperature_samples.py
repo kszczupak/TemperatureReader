@@ -1,3 +1,9 @@
-from src.samples_grabber import capture_samples
+from src.samples_grabber import SamplesGrabber
 
-capture_samples()
+if __name__ == '__main__':
+    grabber = SamplesGrabber()
+    grabber.fetch_samples(
+        cycle_interval=120,
+        samples_limit=3000,
+        bad_images_limit=20
+    )

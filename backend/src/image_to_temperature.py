@@ -22,6 +22,9 @@ class TemperatureReader:
         self._base_path = os.path.dirname(os.path.abspath(__file__))
 
     def process_image(self, image_path):
+        self.temperature_image = None
+        self.first_digit = None
+        self.second_digit = None
         self.temperature_image = self.fetch_temperature(image_path)
         self._fetch_temperature_digits()
 
