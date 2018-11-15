@@ -24,13 +24,6 @@ class SamplesGrabber:
         self._camera.resolution = (3280, 2464)  # Use full resolution of camera; in my case this is useful, because
         # camera is placed ~2 meters from display
 
-    def _capture_image(self):
-        self._camera.start_preview()
-        # Sleep to give camera sensors time to set its light levels
-        sleep(5)
-        self._camera.capture(self._capture_image_path)
-        self._camera.stop_preview()
-
     def fetch_samples(self, cycle_interval=120, samples_limit=1000, bad_images_limit=10):
         self._capture_start_time = time()
         self._capture_start_date = datetime.now()
@@ -40,7 +33,7 @@ class SamplesGrabber:
 
         while True:
             self._setup_cycle()
-            self._capture_image()
+            self._capture_and_analyse_image()
 
             if self._temperature_reader.ok_images_count >= samples_limit:
                 print("Capturing successfully complete. Elapsed time:")
@@ -65,6 +58,13 @@ class SamplesGrabber:
         self._temperature_reader.process_image(self._capture_image_path)
         self._temperature_reader.save_digits_to_file()
         os.remove(self._capture_image_path)
+
+    def _capture_image(self):
+        self._camera.start_preview()
+        # Sleep to give camera sensors time to set its light levels
+        sleep(5)
+        self._camera.capture(self._capture_image_path)
+        self._camera.stop_preview()
 
     def _display_exit_message(self):
         capture_elapsed_time = time() - self._capture_start_time
