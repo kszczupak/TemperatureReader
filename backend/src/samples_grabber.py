@@ -2,10 +2,11 @@ from picamera import PiCamera
 import os
 from time import sleep, time, strftime
 
-from .image_to_temperature import TemperatureReader
+from src.image_to_temperature import TemperatureReader
+
 
 cycle_interval = 120    # Cycle interval in sec
-samples_limit = 1000    # number of samples to capture
+samples_limit = 10    # number of samples to capture
 bad_images_limit = 10
 
 capture_image_path = os.path.join('images', 'captured', 'temp.jpg')
@@ -15,6 +16,10 @@ camera = PiCamera()
 def capture_samples():
     reader = TemperatureReader()
     capture_start_time = time()
+    print("Starting to capture temperature samples...")
+    print("Start time:")
+    formatted_capture_start_time = strftime("%H:%M:%S %d-%m-%Y", capture_start_time)
+    print(formatted_capture_start_time)
 
     while True:
         cycle_start_time = time()
@@ -54,7 +59,3 @@ def capture_image():
     sleep(5)
     camera.capture(capture_image_path)
     camera.stop_preview()
-
-
-if __name__ == '__main__':
-    capture_samples()
