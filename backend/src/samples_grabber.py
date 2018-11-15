@@ -1,6 +1,7 @@
 from picamera import PiCamera
 import os
-from time import sleep, time, strftime
+from time import sleep, time, strftime, gmtime
+from datetime import datetime
 
 from src.image_to_temperature import TemperatureReader
 
@@ -18,8 +19,7 @@ def capture_samples():
     capture_start_time = time()
     print("Starting to capture temperature samples...")
     print("Start time:")
-    formatted_capture_start_time = strftime("%H:%M:%S %d-%m-%Y", capture_start_time)
-    print(formatted_capture_start_time)
+    print(datetime.now())
 
     while True:
         cycle_start_time = time()
@@ -30,7 +30,7 @@ def capture_samples():
 
         if reader.ok_images_count >= samples_limit:
             capture_elapsed_time = time() - capture_start_time
-            formatted_time = strftime("%d [days] : %H [h] : %M [min] : %S [sec]", capture_elapsed_time)
+            formatted_time = strftime("%H [h] : %M [min] : %S [sec]", gmtime(capture_elapsed_time))
             print("Capturing successfully complete. Elapsed time:")
             print(formatted_time)
             reader.show_stats()
@@ -38,7 +38,7 @@ def capture_samples():
 
         if reader.bad_images_count >= bad_images_limit:
             capture_elapsed_time = time() - capture_start_time
-            formatted_time = strftime("%d [days] : %H [h] : %M [min] : %S [sec]", capture_elapsed_time)
+            formatted_time = strftime("%H [h] : %M [min] : %S [sec]", gmtime(capture_elapsed_time))
             print("Reached limit of bad samples. Aborting operation.  Elapsed time:")
             print(formatted_time)
             reader.show_stats()
