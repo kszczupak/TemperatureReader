@@ -13,6 +13,7 @@ bad_images_limit = 10
 script_path = os.path.dirname(os.path.abspath(__file__))
 capture_image_path = os.path.join(script_path, 'images', 'captured', 'temp.jpg')
 camera = PiCamera()
+camera.resolution = (3280, 2464) # Use full resolution of camera
 
 
 def capture_samples():
