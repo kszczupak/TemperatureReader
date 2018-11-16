@@ -58,7 +58,7 @@ class SamplesGrabber:
         clear_terminal()
         print(f"Capturing process started on {self._capture_start_date}")
         self._cycle_start_time = time()
-        print(f"Starting next cycle...")
+        print(f"Starting processing cycle...")
 
     def _capture_and_analyse_image(self):
         self._capture_image()
