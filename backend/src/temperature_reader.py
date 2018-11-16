@@ -28,6 +28,19 @@ class TemperatureReader:
         self.temperature_image = self.fetch_temperature(image_path)
         self._fetch_temperature_digits()
 
+    def is_display_off(self):
+        """
+        Checks if display with temperature digits is off.
+        Method checks currently processed image, so caller
+        is expected to invoke process_image method first in
+        order to update current image.
+        :return: True is display is off; False otherwise
+        """
+        # For now check if processing of the current image resulted in isolating valid digits.
+        # This can be misleading in some cases, so it can be replaced with more sophisticated method.
+        # E.g. some trained context classifier.
+        return self.first_digit is None or self.second_digit is None
+
     def show_temperature_image(self):
         fig, ax = plt.subplots()
         ax.imshow(self.temperature_image)
@@ -36,7 +49,7 @@ class TemperatureReader:
         plt.show()
 
     def save_digits_to_file(self):
-        if self.first_digit is None or self.second_digit is None:
+        if self.is_display_off():
             return
 
         path = os.path.join('images', 'digits')
@@ -48,12 +61,6 @@ class TemperatureReader:
         file_name = f"{uuid4()}.jpg"
         self.save_image(self.second_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
-
-        self.show_stats()
-
-    def show_stats(self):
-        print(f"OK images saved: {self.ok_images_count}")
-        print(f"Bad images saved: {self.bad_images_count}")
 
     @classmethod
     def fetch_temperature(cls, raw_image_path):
@@ -111,21 +118,26 @@ class TemperatureReader:
         labeled_image = measure.label(self.temperature_image)
         image_regions = measure.regionprops(labeled_image)
 
-        if len(image_regions) != 2:
-            bad_image_name = f"{uuid4()}.jpg"
-            print(f"Warning: Was not able to fetch single digits from image. Image was saved as {bad_image_name}")
-            path = os.path.join('images', 'bad', bad_image_name)
-            self.save_image(self.temperature_image, path)
-            self.bad_images_count += 1
-
-            self.show_stats()
-
+        if len(image_regions) == 2:
+            # Processing returned valid results
+            self.first_digit = self._pad_and_resize(image_regions[0].image)
+            self.second_digit = self._pad_and_resize(image_regions[1].image)
             return
 
-        self.first_digit = self._pad_and_resize(image_regions[0].image)
-        self.second_digit = self._pad_and_resize(image_regions[1].image)
+        elif len(image_regions) == 0:
+            # No region could be isolated
+            # Probably screen is off, so do nothing
+            return
 
-        return
+        # Only one region could be isolated, meaning probably that image processing pipeline could not split
+        # temperature to single digits, or there is more regions isolated than expected.
+        # In any case this probably means that processing pipeline should be adjusted so save source
+        # temperature image to file
+        bad_image_name = f"{uuid4()}.jpg"
+        print(f"Warning: Was not able to fetch single digits from image. Image was saved as {bad_image_name}")
+        path = os.path.join('images', 'bad', bad_image_name)
+        self.save_image(self.temperature_image, path)
+        self.bad_images_count += 1
 
     @staticmethod
     def _pad_and_resize(image):
