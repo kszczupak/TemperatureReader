@@ -2,6 +2,7 @@ from skimage import io, transform, color, filters, morphology, measure
 import numpy as np
 from uuid import uuid4
 import os
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 
@@ -135,12 +136,20 @@ class TemperatureReader:
 
         # Only one region could be isolated, meaning probably that image processing pipeline could not split
         # temperature to single digits, or there is more regions isolated than expected.
-        # In any case this probably means that processing pipeline should be adjusted so save source
-        # temperature image to file
-        bad_image_name = f"{uuid4()}.jpg"
-        print(f"Warning: Was not able to fetch single digits from image. Image was saved as {bad_image_name}")
-        path = os.path.join('images', 'bad', bad_image_name)
-        self._save_image(self.temperature_image, path)
+        # In any case this probably means that processing pipeline should be adjusted so save source and
+        # fetched temperature images to file
+
+        bad_images_folder_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
+
+        source_file = os.path.join(bad_images_folder_relative_path, "source.jpg")
+        self._save_image(self.full_image, source_file)
+
+        temperature_file = os.path.join(bad_images_folder_relative_path, "temperature.jpg")
+        self._save_image(self.temperature_image, temperature_file)
+
+        print(f"Warning: Was not able to fetch single digits from image.")
+        print("Image was saved in '{bad_images_folder_relative_path}' folder")
         self.bad_images_count += 1
 
     @staticmethod
