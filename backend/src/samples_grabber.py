@@ -4,7 +4,7 @@ from time import sleep, time, strftime, gmtime
 from datetime import datetime
 
 from src.temperature_reader import TemperatureReader
-from src.utils import clear_terminal
+from src.utils import clear_terminal, print_spinning_cursor
 
 
 class SamplesGrabber:
@@ -87,7 +87,7 @@ class SamplesGrabber:
         if cycle_elapsed_time < requested_interval:
             to_sleep = requested_interval - cycle_elapsed_time
             print(f"Waiting {to_sleep} [sec] to complete cycle interval...")
-            sleep(to_sleep)
+            print_spinning_cursor(to_sleep)
 
     def _show_stats(self):
         print("Current metrics:")
