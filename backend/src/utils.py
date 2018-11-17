@@ -17,7 +17,7 @@ def print_spinning_cursor(sec):
                 yield cursor
 
     cursor_position = get_cursor_position()
-    for _ in range(sec * 10):
+    for _ in range(int(sec) * 10):
         sys.stdout.write(next(cursor_position))
         sys.stdout.flush()
         time.sleep(0.1)
