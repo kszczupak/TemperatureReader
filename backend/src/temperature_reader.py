@@ -14,6 +14,7 @@ class TemperatureReader:
     """
 
     def __init__(self):
+        self.full_image = None
         self.temperature_image = None
         self.first_digit = None
         self.second_digit = None
@@ -22,10 +23,8 @@ class TemperatureReader:
         self._base_path = os.path.dirname(os.path.abspath(__file__))
 
     def process_image(self, image_path):
-        self.temperature_image = None
-        self.first_digit = None
-        self.second_digit = None
-        self.temperature_image = self.fetch_temperature(image_path)
+        self._reset_images()
+        self._fetch_temperature_image(image_path)
         self._fetch_temperature_digits()
 
     def is_display_off(self):
@@ -55,29 +54,28 @@ class TemperatureReader:
         path = os.path.join('images', 'digits')
 
         file_name = f"{uuid4()}.jpg"
-        self.save_image(self.first_digit, os.path.join(path, file_name))
+        self._save_image(self.first_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
 
         file_name = f"{uuid4()}.jpg"
-        self.save_image(self.second_digit, os.path.join(path, file_name))
+        self._save_image(self.second_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
 
-    @classmethod
-    def fetch_temperature(cls, raw_image_path):
-        full_image = cls.load_image(raw_image_path)
-        temperature_image_color = cls.fetch_temperature_area(full_image)
-        processed_temperature_image = cls.apply_image_processing(temperature_image_color)
+    def _fetch_temperature_image(self, raw_image_path):
+        self._load_image(raw_image_path)
+        temperature_image_color = self._fetch_temperature_area()
+        processed_temperature_image = self.apply_image_processing(temperature_image_color)
 
-        return processed_temperature_image
+        self.temperature_image = processed_temperature_image
 
-    @staticmethod
-    def load_image(image_path):
-        return io.imread(image_path)
+    def _load_image(self, image_path):
+        self.full_image = io.imread(image_path)
 
-    @staticmethod
-    def fetch_temperature_area(full_image):
+    def _fetch_temperature_area(self):
+        # For now it is hardcoded; it will be moved to config file in the future
         x1, y1, x2, y2 = 1582, 1220, 1640, 1148
-        temperature_area = full_image[y2:y1, x1:x2]
+
+        temperature_area = self.full_image[y2:y1, x1:x2]
         return transform.rotate(temperature_area, 90, resize=True)
 
     @classmethod
@@ -110,9 +108,15 @@ class TemperatureReader:
 
         return morphology.remove_small_objects(opened_image, min_size=100)
 
-    def save_image(self, image, relative_path):
+    def _save_image(self, image, relative_path):
         full_path = os.path.join(self._base_path, relative_path)
         io.imsave(full_path, image)
+
+    def _reset_images(self):
+        self.full_image = None
+        self.temperature_image = None
+        self.first_digit = None
+        self.second_digit = None
 
     def _fetch_temperature_digits(self):
         labeled_image = measure.label(self.temperature_image)
@@ -136,7 +140,7 @@ class TemperatureReader:
         bad_image_name = f"{uuid4()}.jpg"
         print(f"Warning: Was not able to fetch single digits from image. Image was saved as {bad_image_name}")
         path = os.path.join('images', 'bad', bad_image_name)
-        self.save_image(self.temperature_image, path)
+        self._save_image(self.temperature_image, path)
         self.bad_images_count += 1
 
     @staticmethod
