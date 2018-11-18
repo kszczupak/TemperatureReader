@@ -1,9 +1,10 @@
-from skimage import io, transform, color, filters, morphology, measure
-import numpy as np
 from uuid import uuid4
 import os
 from datetime import datetime
+from shutil import copyfile
 
+from skimage import io, transform, color, filters, morphology, measure
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -15,7 +16,8 @@ class TemperatureReader:
     """
 
     def __init__(self):
-        self.full_image = None
+        self._original_image_path = None
+        self.full_image = None  # This not need to be class variable
         self.temperature_image = None
         self.first_digit = None
         self.second_digit = None
@@ -25,7 +27,9 @@ class TemperatureReader:
 
     def process_image(self, image_path):
         self._reset_images()
-        self._fetch_temperature_image(image_path)
+
+        self._original_image_path = image_path
+        self._fetch_temperature_image()
         self._fetch_temperature_digits()
 
     def is_display_off(self):
@@ -62,15 +66,15 @@ class TemperatureReader:
         self._save_image(self.second_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
 
-    def _fetch_temperature_image(self, raw_image_path):
-        self._load_image(raw_image_path)
+    def _fetch_temperature_image(self):
+        self._load_original_image()
         temperature_image_color = self._fetch_temperature_area()
         processed_temperature_image = self.apply_image_processing(temperature_image_color)
 
         self.temperature_image = processed_temperature_image
 
-    def _load_image(self, image_path):
-        self.full_image = io.imread(image_path)
+    def _load_original_image(self):
+        self.full_image = io.imread(self._original_image_path)
 
     def _fetch_temperature_area(self):
         # For now it is hardcoded; it will be moved to config file in the future
@@ -114,6 +118,7 @@ class TemperatureReader:
         io.imsave(full_path, image)
 
     def _reset_images(self):
+        self._original_image_path = None
         self.full_image = None
         self.temperature_image = None
         self.first_digit = None
@@ -143,7 +148,9 @@ class TemperatureReader:
         bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
 
         source_file = os.path.join(bad_images_folder_relative_path, "source.jpg")
-        self._save_image(self.full_image, source_file)
+        # Saving large image sitting in RAM causes RAM memory issue on Raspberry Pi Zero
+        # Copy original file instead
+        copyfile(self._original_image_path, source_file)
 
         temperature_file = os.path.join(bad_images_folder_relative_path, "temperature.jpg")
         self._save_image(self.temperature_image, temperature_file)
