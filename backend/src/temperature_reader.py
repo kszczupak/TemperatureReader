@@ -159,7 +159,7 @@ class TemperatureReader:
         self._save_image(self.temperature_image, temperature_file)
 
         print(f"Warning: Was not able to fetch single digits from image.")
-        print("Image was saved in '{bad_images_folder_relative_path}' folder")
+        print(f"Image was saved in '{bad_images_folder_relative_path}' folder")
         self.bad_images_count += 1
 
     @staticmethod
