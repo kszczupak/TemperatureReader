@@ -147,7 +147,7 @@ class TemperatureReader:
         bad_images_folder_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
 
-        source_file = os.path.join(bad_images_folder_relative_path, "source.jpg")
+        source_file = os.path.join(self._base_path, bad_images_folder_relative_path, "source.jpg")
         # Saving large image sitting in RAM causes RAM memory issue on Raspberry Pi Zero
         # Copy original file instead
         copyfile(self._original_image_path, source_file)
