@@ -1,4 +1,3 @@
-from uuid import uuid4
 import os
 from datetime import datetime
 from shutil import copyfile
@@ -57,12 +56,13 @@ class TemperatureReader:
             return
 
         path = os.path.join('images', 'digits')
+        digits_file_prefix = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-        file_name = f"{uuid4()}.jpg"
+        file_name = f"{digits_file_prefix}_1.jpg"
         self._save_image(self.first_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
 
-        file_name = f"{uuid4()}.jpg"
+        file_name = f"{digits_file_prefix}_2.jpg"
         self._save_image(self.second_digit, os.path.join(path, file_name))
         self.ok_images_count += 1
 
