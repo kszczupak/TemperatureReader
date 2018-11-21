@@ -6,6 +6,8 @@ from skimage import io, transform, color, filters, morphology, measure
 import numpy as np
 import matplotlib.pyplot as plt
 
+from config import project_root
+
 
 class TemperatureReader:
     """
@@ -77,7 +79,7 @@ class TemperatureReader:
         self.full_image = io.imread(self._original_image_path)
 
     def _fetch_temperature_area(self):
-        # For now it is hardcoded; it will be moved to config file in the future
+        # For now it is hardcoded; it will be moved to config2 file in the future
         x1, y1, x2, y2 = 1582, 1220, 1640, 1148
 
         temperature_area = self.full_image[y2:y1, x1:x2]

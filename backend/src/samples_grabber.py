@@ -1,8 +1,8 @@
-from picamera import PiCamera
 import os
-from time import sleep, time, strftime, gmtime
+from time import time, strftime, gmtime
 from datetime import datetime
 
+from src.camera import capture_image
 from src.temperature_reader import TemperatureReader
 from src.utils import clear_terminal, print_spinning_cursor
 
@@ -10,21 +10,11 @@ from src.utils import clear_terminal, print_spinning_cursor
 class SamplesGrabber:
     def __init__(self):
         self._temperature_reader = TemperatureReader()
-        self._base_path = os.path.dirname(os.path.abspath(__file__))  # Absolute path to this script; will be used to
-        # resolve relative paths
-        self._capture_image_path = os.path.join(self._base_path, 'images', 'captured', 'temp.jpg')
-        self._camera = None
-        self._setup_camera()
         self._cycle_start_time = None
         self._capture_start_time = None
         self._capture_start_date = None
         self._samples_limit = None
         self._bad_images_limit = None
-
-    def _setup_camera(self):
-        self._camera = PiCamera()
-        self._camera.resolution = (3280, 2464)  # Use full resolution of camera; in my case this is useful, because
-        # camera is placed ~2 meters from display
 
     def fetch_samples(self, cycle_interval=120, samples_limit=1000, bad_images_limit=10):
         self._capture_start_time = time()
@@ -61,17 +51,10 @@ class SamplesGrabber:
         print(f"Starting processing cycle...")
 
     def _capture_and_analyse_image(self):
-        self._capture_image()
-        self._temperature_reader.process_image(self._capture_image_path)
+        image = capture_image()
+        self._temperature_reader.process_image(image)
         self._temperature_reader.save_digits_to_file()
-        os.remove(self._capture_image_path)
-
-    def _capture_image(self):
-        self._camera.start_preview()
-        # Sleep to give camera sensors time to set its light levels
-        sleep(5)
-        self._camera.capture(self._capture_image_path)
-        self._camera.stop_preview()
+        os.remove(image)
 
     def _display_exit_message(self):
         capture_elapsed_time = time() - self._capture_start_time
