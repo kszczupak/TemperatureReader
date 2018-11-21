@@ -1,7 +1,7 @@
 from time import sleep
 import os
 
-from picamera import Camera
+from picamera import PiCamera
 
 from config import project_root
 
