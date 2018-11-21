@@ -62,10 +62,7 @@ class TemperatureReader:
 
         if len(image_regions) == 2:
             # Processing returned valid results
-            self.temperature_digits = (
-                self._pad_and_resize(image_regions[0].image),
-                self._pad_and_resize(image_regions[1].image)
-            )
+            self.temperature_digits = self._determine_digits_order(image_regions)
             return
 
         elif len(image_regions) == 0:
@@ -93,6 +90,24 @@ class TemperatureReader:
 
         raise TemperatureReaderError(f"Was not able to fetch single digits from image. Image was saved in"
                                      f"'{bad_images_folder_relative_path}' folder")
+
+    def _determine_digits_order(self, regions):
+        """
+        Returns tuple of digits images in correct order
+        """
+        first_object_position_x = regions[0].centroid[0]
+        second_object_position_x = regions[1].centroid[0]
+
+        if first_object_position_x < second_object_position_x:
+            return (
+                self._pad_and_resize(regions[0].image),
+                self._pad_and_resize(regions[1].image)
+            )
+
+        return (
+                self._pad_and_resize(regions[1].image),
+                self._pad_and_resize(regions[0].image)
+            )
 
     def _apply_image_processing(self):
         image_grey = color.rgb2grey(self.original_image)  # Convert to gray scale
