@@ -84,5 +84,5 @@ class SamplesGrabber:
 
     def _show_stats(self):
         print("Current metrics:")
-        print(f"Valid samples gathered: {self._temperature_reader.ok_images_count}/{self._samples_limit}")
-        print(f"Bad images gathered: {self._temperature_reader.bad_images_count}/{self._bad_images_limit}")
+        print(f"Valid samples gathered: {self._ok_samples_collected}/{self._samples_limit}")
+        print(f"Bad images gathered: {self._bad_samples_collected}/{self._bad_images_limit}")
