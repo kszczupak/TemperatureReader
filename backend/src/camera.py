@@ -8,7 +8,7 @@ from config import project_root
 
 def capture_image(image_file_name='image.jpg'):
     with PiCamera() as camera:
-        image_file = os.path.join(project_root, 'src', 'captured', image_file_name)
+        image_file = os.path.join(project_root, 'images', 'captured', image_file_name)
         resolution = (3280, 2464)
         camera.resolution = resolution
         camera.rotation = 270

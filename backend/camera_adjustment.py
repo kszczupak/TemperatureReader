@@ -5,6 +5,8 @@ from datetime import datetime
 
 from picamera import PiCamera
 
+from config import project_root
+
 camera = PiCamera()
 
 camera_defaults = {
@@ -82,8 +84,7 @@ def sequential_capture(resolution, folder):
 
 
 def capture_using_different_modes(cycles=5):
-    script_path = os.path.dirname(os.path.abspath(__file__))
-    base_folder = os.path.join(script_path, "src", "images", "camera_adjustment")
+    base_folder = os.path.join(project_root, "images", "camera_adjustment")
 
     resolutions = [
         (1024, 768),
