@@ -1,12 +1,14 @@
 import os
 from datetime import datetime
-from shutil import copyfile
 
-from skimage import io, transform, color, filters, morphology, measure
+from skimage import io, transform, color, filters, morphology, measure, util
 import numpy as np
-import matplotlib.pyplot as plt
 
 from config import project_root
+
+
+class TemperatureReaderError(Exception):
+    pass
 
 
 class TemperatureReader:
@@ -17,21 +19,19 @@ class TemperatureReader:
     """
 
     def __init__(self):
-        self._original_image_path = None
-        self.full_image = None  # This not need to be class variable
-        self.temperature_image = None
-        self.first_digit = None
-        self.second_digit = None
-        self.bad_images_count = 0
-        self.ok_images_count = 0
-        self._base_path = os.path.dirname(os.path.abspath(__file__))
+        self.original_image = None
+        self.processed_image = None
+        self.temperature_digits = tuple()
+        self._is_display_off = False
 
-    def process_image(self, image_path):
-        self._reset_images()
-
-        self._original_image_path = image_path
-        self._fetch_temperature_image()
+    def load_and_process_image(self, image_path):
+        self._is_display_off = False
+        self.original_image = io.imread(image_path)
+        self._apply_image_processing()
         self._fetch_temperature_digits()
+
+    def get_temperature(self):
+        pass
 
     def is_display_off(self):
         """
@@ -44,63 +44,72 @@ class TemperatureReader:
         # For now check if processing of the current image resulted in isolating valid digits.
         # This can be misleading in some cases, so it can be replaced with more sophisticated method.
         # E.g. some trained context classifier.
-        return self.first_digit is None or self.second_digit is None
-
-    def show_temperature_image(self):
-        fig, ax = plt.subplots()
-        ax.imshow(self.temperature_image)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        plt.show()
+        return self._is_display_off
 
     def save_digits_to_file(self):
-        if self.is_display_off():
-            return
-
-        path = os.path.join('images', 'digits')
+        relative_folder = os.path.join('images', 'digits')
         digits_file_prefix = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         file_name = f"{digits_file_prefix}_1.jpg"
-        self._save_image(self.first_digit, os.path.join(path, file_name))
-        self.ok_images_count += 1
+        self._save_image(self.temperature_digits[0], os.path.join(relative_folder, file_name))
 
         file_name = f"{digits_file_prefix}_2.jpg"
-        self._save_image(self.second_digit, os.path.join(path, file_name))
-        self.ok_images_count += 1
+        self._save_image(self.temperature_digits[1], os.path.join(relative_folder, file_name))
 
-    def _fetch_temperature_image(self):
-        self._load_original_image()
-        temperature_image_color = self._fetch_temperature_area()
-        processed_temperature_image = self.apply_image_processing(temperature_image_color)
+    def _fetch_temperature_digits(self):
+        labeled_image = measure.label(self.processed_image)
+        image_regions = measure.regionprops(labeled_image)
 
-        self.temperature_image = processed_temperature_image
+        if len(image_regions) == 2:
+            # Processing returned valid results
+            self.temperature_digits = (
+                self._pad_and_resize(image_regions[0].image),
+                self._pad_and_resize(image_regions[1].image)
+            )
+            return
 
-    def _load_original_image(self):
-        self.full_image = io.imread(self._original_image_path)
+        elif len(image_regions) == 0:
+            # No region could be isolated
+            # Probably screen is off
+            self._is_display_off = True
+            return
 
-    def _fetch_temperature_area(self):
-        # For now it is hardcoded; it will be moved to config2 file in the future
-        x1, y1, x2, y2 = 1582, 1220, 1640, 1148
+        # Only one region could be isolated, meaning probably that image processing pipeline could not split
+        # temperature to single digits, or there is more regions isolated than expected.
+        # In any case this probably means that processing pipeline should be adjusted so save source and
+        # fetched temperature images to file
 
-        temperature_area = self.full_image[y2:y1, x1:x2]
-        return transform.rotate(temperature_area, 90, resize=True)
+        bad_images_folder_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
 
-    @classmethod
-    def apply_image_processing(cls, image):
-        image_grey = cls.convert_to_grey(image)
-        threshold_image = cls.apply_threshold(image_grey)
-        thinned = cls.apply_thin(threshold_image)
-        clean_image = cls.cleanup_image(thinned)
+        bad_images_folder_full_path = os.path.join(project_root, bad_images_folder_relative_path)
+        os.mkdir(bad_images_folder_full_path)
 
-        return clean_image
+        original_file_relative = os.path.join(bad_images_folder_relative_path, "original.jpg")
+        self._save_image(self.original_image, original_file_relative)
 
-    @staticmethod
-    def convert_to_grey(image_color):
-        return color.rgb2grey(image_color)
+        processed_file = os.path.join(bad_images_folder_relative_path, "processed.jpg")
+        self._save_image(self.processed_image, processed_file)
+
+        raise TemperatureReaderError(f"Was not able to fetch single digits from image. Image was saved in"
+                                     f"'{bad_images_folder_relative_path}' folder")
+
+    def _apply_image_processing(self):
+        image_grey = color.rgb2grey(self.original_image)  # Convert to gray scale
+
+        # Invert to get black background and white object
+        # Some algorithms do not work correctly in different conditions
+        image_grey = util.invert(image_grey)
+
+        threshold_image = self.apply_threshold(image_grey)
+        thinned = self.apply_thin(threshold_image)
+        clean_image = self.cleanup_image(thinned)
+
+        self.processed_image = clean_image
 
     @staticmethod
     def apply_threshold(image_grey):
-        threshold_value = filters.threshold_local(image_grey, block_size=23)
+        threshold_value = filters.threshold_local(image_grey, block_size=113)
         threshold_image = image_grey > threshold_value
 
         return threshold_image
@@ -113,56 +122,12 @@ class TemperatureReader:
     def cleanup_image(image):
         opened_image = morphology.opening(image, selem=morphology.disk(2))
 
-        return morphology.remove_small_objects(opened_image, min_size=100)
+        return morphology.remove_small_objects(opened_image, min_size=1000)
 
-    def _save_image(self, image, relative_path):
-        full_path = os.path.join(self._base_path, relative_path)
+    @staticmethod
+    def _save_image(image, relative_path):
+        full_path = os.path.join(project_root, relative_path)
         io.imsave(full_path, image)
-
-    def _reset_images(self):
-        self._original_image_path = None
-        self.full_image = None
-        self.temperature_image = None
-        self.first_digit = None
-        self.second_digit = None
-
-    def _fetch_temperature_digits(self):
-        labeled_image = measure.label(self.temperature_image)
-        image_regions = measure.regionprops(labeled_image)
-
-        if len(image_regions) == 2:
-            # Processing returned valid results
-            self.first_digit = self._pad_and_resize(image_regions[0].image)
-            self.second_digit = self._pad_and_resize(image_regions[1].image)
-            return
-
-        elif len(image_regions) == 0:
-            # No region could be isolated
-            # Probably screen is off, so do nothing
-            return
-
-        # Only one region could be isolated, meaning probably that image processing pipeline could not split
-        # temperature to single digits, or there is more regions isolated than expected.
-        # In any case this probably means that processing pipeline should be adjusted so save source and
-        # fetched temperature images to file
-
-        bad_images_folder_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
-
-        bad_images_folder_full_path = os.path.join(self._base_path, bad_images_folder_relative_path)
-        os.mkdir(bad_images_folder_full_path)
-
-        source_file = os.path.join(bad_images_folder_full_path, "source.jpg")
-        # Saving large image sitting in RAM causes RAM memory issue on Raspberry Pi Zero
-        # Copy original file instead
-        copyfile(self._original_image_path, source_file)
-
-        temperature_file = os.path.join(bad_images_folder_relative_path, "temperature.jpg")
-        self._save_image(self.temperature_image, temperature_file)
-
-        print(f"Warning: Was not able to fetch single digits from image.")
-        print(f"Image was saved in '{bad_images_folder_relative_path}' folder")
-        self.bad_images_count += 1
 
     @staticmethod
     def _pad_and_resize(image):
@@ -173,5 +138,5 @@ class TemperatureReader:
 
 if __name__ == '__main__':
     reader = TemperatureReader()
-    reader.process_image("jasne.jpg")
+    reader.load_and_process_image("jasne.jpg")
     reader.save_digits_to_file()

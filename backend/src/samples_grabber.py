@@ -3,13 +3,15 @@ from time import time, strftime, gmtime
 from datetime import datetime
 
 from src.camera import capture_image
-from src.temperature_reader import TemperatureReader
+from src.temperature_reader import TemperatureReader, TemperatureReaderError
 from src.utils import clear_terminal, print_spinning_cursor
 
 
 class SamplesGrabber:
     def __init__(self):
         self._temperature_reader = TemperatureReader()
+        self._ok_samples_collected = 0
+        self._bad_samples_collected = 0
         self._cycle_start_time = None
         self._capture_start_time = None
         self._capture_start_date = None
@@ -29,18 +31,15 @@ class SamplesGrabber:
             self._setup_cycle()
             self._capture_and_analyse_image()
 
-            if self._temperature_reader.ok_images_count >= self._samples_limit:
+            if self._ok_samples_collected >= self._samples_limit:
                 print("Capturing successfully complete. Elapsed time:")
                 self._display_exit_message()
                 return
 
-            if self._temperature_reader.bad_images_count >= self._bad_images_limit:
+            if self._bad_samples_collected >= self._bad_images_limit:
                 print("Reached limit of bad samples. Aborting operation.  Elapsed time:")
                 self._display_exit_message()
                 return
-
-            if self._temperature_reader.is_display_off():
-                print("Temperature display is off. Samples was not gathered in this cycle.")
 
             self._complete_cycle(requested_interval=cycle_interval)
 
@@ -51,10 +50,21 @@ class SamplesGrabber:
         print(f"Starting processing cycle...")
 
     def _capture_and_analyse_image(self):
-        image = capture_image()
-        self._temperature_reader.process_image(image)
-        self._temperature_reader.save_digits_to_file()
-        os.remove(image)
+        try:
+            image = capture_image()
+            self._temperature_reader.load_and_process_image(image)
+
+            if self._temperature_reader.is_display_off():
+                print("Temperature display is off. Samples was not gathered in this cycle.")
+                return
+
+            self._temperature_reader.save_digits_to_file()
+            os.remove(image)
+            self._ok_samples_collected += 2
+
+        except TemperatureReaderError:
+            print("WARNING: Could not convert current image to samples.")
+            self._bad_samples_collected += 1
 
     def _display_exit_message(self):
         capture_elapsed_time = time() - self._capture_start_time
