@@ -101,8 +101,8 @@ class TemperatureReader:
         """
         Returns tuple of digits images in correct order
         """
-        first_object_position_x = regions[0].centroid[0]
-        second_object_position_x = regions[1].centroid[0]
+        first_object_position_x = regions[0].centroid[1]
+        second_object_position_x = regions[1].centroid[1]
 
         if first_object_position_x < second_object_position_x:
             return (
