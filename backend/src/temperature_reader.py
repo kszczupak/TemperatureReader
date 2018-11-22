@@ -162,7 +162,9 @@ class TemperatureReader:
     def _pad_and_resize(image):
         padded_image = np.pad(image, pad_width=1, mode='constant', constant_values=False)
 
-        return transform.resize(padded_image, (35, 25), mode='reflect', preserve_range=True)
+        # It is important to save width/height ratio when resizing
+        # In this case this ratio ~1.4
+        return transform.resize(padded_image, (22, 16), mode='reflect', preserve_range=True)
 
 
 if __name__ == '__main__':
