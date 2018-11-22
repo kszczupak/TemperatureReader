@@ -23,6 +23,7 @@ class TemperatureReader:
         self.processed_image = None
         self.temperature_digits = tuple()
         self._is_display_off = False
+        self._partially_processed_images = dict()
 
     def load_and_process_image(self, image_path):
         self._is_display_off = False
@@ -75,6 +76,13 @@ class TemperatureReader:
         # temperature to single digits, or there is more regions isolated than expected.
         # In any case this probably means that processing pipeline should be adjusted so save source and
         # fetched temperature images to file
+        self._handle_image_processing_error()
+
+    def _handle_image_processing_error(self):
+        """
+        Handles case when image processing pipeline could not return valid results.
+        All images from image processing pipeline are saved to file.
+        """
 
         bad_images_folder_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         bad_images_folder_relative_path = os.path.join('images', 'bad', bad_images_folder_name)
@@ -82,14 +90,12 @@ class TemperatureReader:
         bad_images_folder_full_path = os.path.join(project_root, bad_images_folder_relative_path)
         os.mkdir(bad_images_folder_full_path)
 
-        original_file_relative = os.path.join(bad_images_folder_relative_path, "original.jpg")
-        self._save_image(self.original_image, original_file_relative)
+        for image_name in self._partially_processed_images:
+            file = os.path.join(bad_images_folder_relative_path, f"{image_name}.jpg")
+            self._save_image(self._partially_processed_images[image_name], file)
 
-        processed_file = os.path.join(bad_images_folder_relative_path, "processed.jpg")
-        self._save_image(self.processed_image, processed_file)
-
-        raise TemperatureReaderError(f"Was not able to fetch single digits from image. Image was saved in"
-                                     f"'{bad_images_folder_relative_path}' folder")
+        raise TemperatureReaderError(f"Was not able to fetch single digits from image. Images was saved"
+                                     f" in '{bad_images_folder_relative_path}' folder")
 
     def _determine_digits_order(self, regions):
         """
@@ -119,6 +125,14 @@ class TemperatureReader:
         threshold_image = self.apply_threshold(image_grey)
         thinned = self.apply_thin(threshold_image)
         clean_image = self.cleanup_image(thinned)
+
+        self._partially_processed_images = {
+            "0_original": self.original_image,
+            "1_grayed_inverted": image_grey,
+            "2_after_threshold": threshold_image,
+            "3_thinned": thinned,
+            "4_processed": clean_image
+        }
 
         self.processed_image = clean_image
 
@@ -153,5 +167,5 @@ class TemperatureReader:
 
 if __name__ == '__main__':
     reader = TemperatureReader()
-    reader.load_and_process_image("jasne.jpg")
+    reader.load_and_process_image("image_1.jpg")
     reader.save_digits_to_file()
