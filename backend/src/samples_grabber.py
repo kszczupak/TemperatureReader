@@ -50,17 +50,19 @@ class SamplesGrabber:
         print(f"Starting processing cycle...")
 
     def _capture_and_analyse_image(self):
+        image = capture_image()
+
         try:
-            image = capture_image()
             self._temperature_reader.load_and_process_image(image)
             self._temperature_reader.save_digits_to_file()
-            os.remove(image)
             self._ok_samples_collected += 2
         except ImageProcessingError:
             print("WARNING: Could not convert current image to samples.")
             self._bad_samples_collected += 1
         except DisplayOffError:
             print("Temperature display is off. Samples was not gathered in this cycle.")
+        finally:
+            os.remove(image)
 
     def _display_exit_message(self):
         capture_elapsed_time = time() - self._capture_start_time
