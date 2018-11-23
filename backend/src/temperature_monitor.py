@@ -1,15 +1,17 @@
 import os
-from time import time, strftime, gmtime
+from time import time
 from datetime import datetime
 
 from src.camera import capture_image
 from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
 from src.utils import clear_terminal, print_spinning_cursor
+from config import config
 
 
 class TemperatureMonitor:
-    def __init__(self):
+    def __init__(self, session=None):
         self._temperature_reader = TemperatureReader()
+        self._session = session
         self._current_temperature = 0
         self._invalid_readings = 0
         self._cycle_start_time = None
@@ -28,9 +30,25 @@ class TemperatureMonitor:
             self._capture_and_analyse_image()
             self._complete_cycle(requested_interval=cycle_interval)
 
+    @property
+    def temperature(self):
+        return self._current_temperature
+
+    @temperature.setter
+    def temperature(self, new_value):
+        # Validacja, wyslanie w wamp eventu
+        self._current_temperature = new_value
+
+        if self._session is not None:
+            self._session.publish(config["crossbar"]["temperature_topic"], new_value)
+            print(f"Send new temperature on topic: {config['crossbar']['temperature_topic']}")
+
     def _setup_cycle(self):
         clear_terminal()
-        print(f"Last measured temperature: {self._current_temperature}")
+        if self._session is not None:
+            print("Connected to Crossbar")
+
+        print(f"Last measured temperature: {self.temperature}")
         print(f"Monitor process started on {self._capture_start_date}")
         self._cycle_start_time = time()
         print(f"Updating temperature...")
@@ -39,7 +57,7 @@ class TemperatureMonitor:
         image = capture_image()
 
         try:
-            self._current_temperature = self._temperature_reader.get_temperature(image)
+            self.temperature = self._temperature_reader.get_temperature(image)
         except ImageProcessingError:
             print("WARNING: Could not convert current image to samples.")
             self._invalid_readings += 1
@@ -59,5 +77,4 @@ class TemperatureMonitor:
             print_spinning_cursor(to_sleep)
 
     def _show_stats(self):
-        print("Current metrics:")
         print(f"Invalid readings: {self._invalid_readings}")
