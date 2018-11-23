@@ -1,0 +1,5 @@
+# This folder is suppoused to be empty (to preserve folder structure in git)
+# Ignore everything
+.gitignore
+# Except this file
+!.gitignore
