@@ -71,7 +71,7 @@ if __name__ == '__main__':
     with open(config["classifier"], mode="rb") as clf_file:
         classifier = pickle.load(clf_file)
 
-    test_file = os.path.join(config["test_images"], '1.jpg')
+    test_file = os.path.join(config["test_images"], "digits", "1.jpg")
     test_image = io.imread(test_file)
     test_image = util.img_as_float(test_image)
     value = classifier.predict(test_image.reshape(1, -1))

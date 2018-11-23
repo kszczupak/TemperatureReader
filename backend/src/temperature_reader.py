@@ -1,10 +1,12 @@
 import os
+import pickle
 from datetime import datetime
 
 from skimage import io, transform, color, filters, morphology, measure, exposure, util
 import numpy as np
 
-from config import project_root
+from config import project_root, config
+from src.digits_classifier import DigitsClassifier
 
 
 class TemperatureReaderError(Exception):
@@ -30,6 +32,7 @@ class TemperatureReader:
         self.original_image = None
         self.processed_image = None
         self.temperature_digits = tuple()
+        self._digits_classifier = None
         self._partially_processed_images = dict()
 
     def load_and_process_image(self, image_path):
@@ -38,8 +41,10 @@ class TemperatureReader:
         self._apply_image_processing()
         self._fetch_temperature_digits()
 
-    def get_temperature(self):
-        pass
+    def get_temperature(self, image_path):
+        self._lazy_load_classifier()
+        self.load_and_process_image(image_path)
+        return self._get_temperature_value()
 
     def save_digits_to_file(self):
         relative_folder = os.path.join('images', 'digits')
@@ -128,6 +133,18 @@ class TemperatureReader:
 
         self.processed_image = clean_image
 
+    def _lazy_load_classifier(self):
+        if self._digits_classifier is not None:
+            return
+
+        self._digits_classifier = DigitsClassifier()
+
+    def _get_temperature_value(self):
+        first_digit_value = self._digits_classifier.get_digit_value(self.temperature_digits[0])
+        second_digit_value = self._digits_classifier.get_digit_value(self.temperature_digits[1])
+
+        return 10 * first_digit_value + second_digit_value
+
     @staticmethod
     def apply_threshold(image_grey):
         threshold_value = filters.threshold_local(image_grey, block_size=113)
@@ -161,5 +178,6 @@ class TemperatureReader:
 
 if __name__ == '__main__':
     reader = TemperatureReader()
-    reader.load_and_process_image("image_1.jpg")
-    reader.save_digits_to_file()
+    temperature_image = os.path.join(config["test_images"], "display_on", "45.jpg")
+    temperature_value = reader.get_temperature(temperature_image)
+    print(temperature_value)
