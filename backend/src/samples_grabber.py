@@ -3,7 +3,7 @@ from time import time, strftime, gmtime
 from datetime import datetime
 
 from src.camera import capture_image
-from src.temperature_reader import TemperatureReader, TemperatureReaderError
+from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
 from src.utils import clear_terminal, print_spinning_cursor
 
 
@@ -53,18 +53,14 @@ class SamplesGrabber:
         try:
             image = capture_image()
             self._temperature_reader.load_and_process_image(image)
-
-            if self._temperature_reader.is_display_off():
-                print("Temperature display is off. Samples was not gathered in this cycle.")
-                return
-
             self._temperature_reader.save_digits_to_file()
             os.remove(image)
             self._ok_samples_collected += 2
-
-        except TemperatureReaderError:
+        except ImageProcessingError:
             print("WARNING: Could not convert current image to samples.")
             self._bad_samples_collected += 1
+        except DisplayOffError:
+            print("Temperature display is off. Samples was not gathered in this cycle.")
 
     def _display_exit_message(self):
         capture_elapsed_time = time() - self._capture_start_time

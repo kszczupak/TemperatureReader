@@ -1,13 +1,21 @@
 import os
 from datetime import datetime
 
-from skimage import io, transform, color, filters, morphology, measure, util
+from skimage import io, transform, color, filters, morphology, measure, exposure, util
 import numpy as np
 
 from config import project_root
 
 
 class TemperatureReaderError(Exception):
+    pass
+
+
+class DisplayOffError(TemperatureReaderError):
+    pass
+
+
+class ImageProcessingError(TemperatureReaderError):
     pass
 
 
@@ -22,30 +30,16 @@ class TemperatureReader:
         self.original_image = None
         self.processed_image = None
         self.temperature_digits = tuple()
-        self._is_display_off = False
         self._partially_processed_images = dict()
 
     def load_and_process_image(self, image_path):
-        self._is_display_off = False
         self.original_image = io.imread(image_path)
+        self._detect_display_off()
         self._apply_image_processing()
         self._fetch_temperature_digits()
 
     def get_temperature(self):
         pass
-
-    def is_display_off(self):
-        """
-        Checks if display with temperature digits is off.
-        Method checks currently processed image, so caller
-        is expected to invoke process_image method first in
-        order to update current image.
-        :return: True is display is off; False otherwise
-        """
-        # For now check if processing of the current image resulted in isolating valid digits.
-        # This can be misleading in some cases, so it can be replaced with more sophisticated method.
-        # E.g. some trained context classifier.
-        return self._is_display_off
 
     def save_digits_to_file(self):
         relative_folder = os.path.join('images', 'digits')
@@ -66,17 +60,15 @@ class TemperatureReader:
             self.temperature_digits = self._determine_digits_order(image_regions)
             return
 
-        elif len(image_regions) == 0:
-            # No region could be isolated
-            # Probably screen is off
-            self._is_display_off = True
-            return
-
         # Only one region could be isolated, meaning probably that image processing pipeline could not split
         # temperature to single digits, or there is more regions isolated than expected.
         # In any case this probably means that processing pipeline should be adjusted so save source and
         # fetched temperature images to file
         self._handle_image_processing_error()
+
+    def _detect_display_off(self):
+        if exposure.is_low_contrast(self.original_image):
+            raise DisplayOffError()
 
     def _handle_image_processing_error(self):
         """
@@ -94,8 +86,8 @@ class TemperatureReader:
             file = os.path.join(bad_images_folder_relative_path, f"{image_name}.jpg")
             self._save_image(self._partially_processed_images[image_name], file)
 
-        raise TemperatureReaderError(f"Was not able to fetch single digits from image. Images was saved"
-                                     f" in '{bad_images_folder_relative_path}' folder")
+        raise ImageProcessingError(f"Was not able to fetch single digits from image. Images was saved"
+                                   f" in '{bad_images_folder_relative_path}' folder")
 
     def _determine_digits_order(self, regions):
         """
@@ -111,9 +103,9 @@ class TemperatureReader:
             )
 
         return (
-                self._pad_and_resize(regions[1].image),
-                self._pad_and_resize(regions[0].image)
-            )
+            self._pad_and_resize(regions[1].image),
+            self._pad_and_resize(regions[0].image)
+        )
 
     def _apply_image_processing(self):
         image_grey = color.rgb2grey(self.original_image)  # Convert to gray scale
