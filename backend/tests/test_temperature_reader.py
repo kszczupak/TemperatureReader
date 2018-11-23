@@ -37,7 +37,7 @@ class ReaderTests(unittest.TestCase):
             self.assertEqual(expected_value, measured_value)
 
     def test_display_off_detection(self):
-        image_path = os.path.join(config["test_images"], "display_off, off_0.jpg")
+        image_path = os.path.join(config["test_images"], "display_off", "off_0.jpg")
         reader = TemperatureReader()
 
         with self.assertRaises(DisplayOffError):
