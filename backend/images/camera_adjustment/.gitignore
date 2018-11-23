@@ -1,8 +1,0 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Empty folder template
-# This folder is suppoused to be empty (to preserve folder structure in git)
-# Ignore everything
-.gitignore
-# Except this file
-!.gitignore
-
