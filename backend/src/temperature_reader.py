@@ -1,5 +1,4 @@
 import os
-import pickle
 from datetime import datetime
 
 from skimage import io, transform, color, filters, morphology, measure, exposure, util
