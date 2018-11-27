@@ -12,6 +12,9 @@ config = {
         "topics": {
             "temperature": "TEMPERATURE_CHANGE",
             "display": "DISPLAY_CHANGE"
+        },
+        "endpoints": {
+            "current_state": "GET_CURRENT_STATUS"
         }
     }
 }

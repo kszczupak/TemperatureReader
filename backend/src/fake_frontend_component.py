@@ -42,4 +42,8 @@ class FakeFrontendWAMPComponent(ApplicationSession):
         def on_temperature_change(new_value):
             print(f"Current temperature: {new_value}")
 
-        self.subscribe(on_temperature_change, config["crossbar"]["temperature_topic"])
+        results = await self.call(config["crossbar"]["endpoints"]["current_state"])
+
+        print(results)
+
+        # self.subscribe(on_temperature_change, config["crossbar"]["temperature_topic"])
