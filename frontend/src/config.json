@@ -1,0 +1,12 @@
+{
+  "crossbar": {
+    "host": "192.168.1.69",
+    "port": 8080,
+    "realm": "realm1",
+    "auth": {
+      "username": "user",
+      "password": "1234"
+    },
+    "topic": "TEMPERATURE_UPDATE"
+  }
+}

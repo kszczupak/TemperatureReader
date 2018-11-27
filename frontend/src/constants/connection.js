@@ -1,0 +1,6 @@
+export const stage = {
+  CONNECTING: 'CONNECTING',
+  CONNECTED: 'CONNECTED',
+  ERROR: 'ERROR',
+  NOT_CONNECTED: 'NOT_CONNECTED'
+};
