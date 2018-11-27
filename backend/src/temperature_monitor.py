@@ -10,9 +10,10 @@ from config import config
 
 
 class TemperatureMonitor:
-    def __init__(self, session=None):
-        self._temperature_reader = TemperatureReader()
+    def __init__(self, session=None, debug=False):
+        self._temperature_reader = TemperatureReader(debug=debug)
         self._session = session
+        self._debug_mode = debug
         self._current_temperature = 0
         self._display_state = DisplayState.OFF
         self._invalid_readings = 0
@@ -73,8 +74,7 @@ class TemperatureMonitor:
         if self._session is not None:
             print("Connected to Crossbar")
 
-        print(f"Last measured temperature: {self.temperature}")
-        print(f"Monitor process started on {self._capture_start_date}")
+        self._show_stats()
         self._cycle_start_time = time()
         print(f"Updating temperature...")
 
@@ -88,14 +88,12 @@ class TemperatureMonitor:
             self._invalid_readings += 1
         except DisplayOffError:
             self.display_state = DisplayState.OFF
-            print("Temperature display is off. Temperature will not be updated in this cycle.")
         finally:
             os.remove(image)
 
     def _complete_cycle(self, requested_interval):
         cycle_elapsed_time = time() - self._cycle_start_time
         print(f"Cycle completed. Elapsed time: {cycle_elapsed_time} [sec]")
-        self._show_stats()
 
         if cycle_elapsed_time < requested_interval:
             to_sleep = requested_interval - cycle_elapsed_time
@@ -103,4 +101,8 @@ class TemperatureMonitor:
             print_spinning_cursor(to_sleep)
 
     def _show_stats(self):
+        print(f"Last measured temperature: {self.temperature}")
+        print(f"Display state: {self.display_state.name}")
+        print(f"Monitor process started on {self._capture_start_date}")
+        print(f"Debug mode: {self._debug_mode}")
         print(f"Invalid readings: {self._invalid_readings}")

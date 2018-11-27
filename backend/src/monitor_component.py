@@ -20,7 +20,8 @@ class MonitorWAMPComponent(ApplicationSession):
     def __init__(self, c=None):
         super().__init__(c)
         self._temperature_monitor = TemperatureMonitor(
-            session=self
+            session=self,
+            debug=False     # Do not save bad readings
         )
 
     # TODO add authentication (here and in router configuration)
@@ -44,5 +45,5 @@ class MonitorWAMPComponent(ApplicationSession):
         print("Successfully connected to Crossbar router")
 
         self._temperature_monitor.run(
-            cycle_interval=15
+            cycle_interval=10
         )

@@ -26,8 +26,8 @@ class TemperatureReader:
     Uses some image processing to extract temperature from image,
     and simple machine learning classifier to read temperature value.
     """
-
-    def __init__(self):
+    def __init__(self, debug=False):
+        self._debug_mode = debug
         self.original_image = None
         self.processed_image = None
         self.temperature_digits = tuple()
@@ -68,7 +68,9 @@ class TemperatureReader:
         # temperature to single digits, or there is more regions isolated than expected.
         # In any case this probably means that processing pipeline should be adjusted so save source and
         # fetched temperature images to file
-        self._handle_image_processing_error()
+        if self._debug_mode:
+            # Save only when in debug mode
+            self._handle_image_processing_error()
 
     def _detect_display_off(self):
         if exposure.is_low_contrast(self.original_image):

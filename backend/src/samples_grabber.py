@@ -9,7 +9,7 @@ from src.utils import clear_terminal, print_spinning_cursor
 
 class SamplesGrabber:
     def __init__(self):
-        self._temperature_reader = TemperatureReader()
+        self._temperature_reader = TemperatureReader(debug=True)
         self._ok_samples_collected = 0
         self._bad_samples_collected = 0
         self._cycle_start_time = None
