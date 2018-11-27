@@ -1,4 +1,4 @@
-import { subscribeToTemperatureUpdate } from './temperature';
+import { subscribeToMonitorUpdates, getCurrentMonitorState } from './monitor';
 import { connectToWAMP, callRPC, subscribe } from './wampConnection';
 
-export { subscribeToTemperatureUpdate, connectToWAMP, callRPC, subscribe };
+export { subscribeToMonitorUpdates, getCurrentMonitorState, connectToWAMP, callRPC, subscribe };

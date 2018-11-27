@@ -43,7 +43,7 @@ export const connectToWAMP = () => (dispatch, getState) => {
 
   wampConnection.onopen = session => {
     dispatch(connectionSuccessful(session));
-    // session.subscribe(config.crossbar.topic, temperature => console.log(temperature))
+    // session.subscribe(config.crossbar.topic, monitor => console.log(monitor))
   };
 
   wampConnection.open();
@@ -51,12 +51,20 @@ export const connectToWAMP = () => (dispatch, getState) => {
 
 // Need to refactor to avoid wampConnection and dispatch args
 // And use direct calls to store.getState() and store.dispatch() like in subscribe
-export const callRPC = (endpoint, args, wampConnection, dispatch) => {
-  if (!wampConnection.connected) {
-    return dispatch(wampError('Connection not ready yet! Operation failed.'));
-  }
+// export const callRPC = (endpoint, args, wampConnection, dispatch) => {
+//   if (!wampConnection.connected) {
+//     return dispatch(wampError('Connection not ready yet! Operation failed.'));
+//   }
+//
+//   return wampConnection.session.call(endpoint, args);
+// };
 
-  return wampConnection.session.call(endpoint, args);
+export const callRPC = (endpoint, args) => {
+    if (!store.getState().wampConnection.connected) {
+        return store.dispatch(wampError('Connection not ready yet! Operation failed.'));
+    }
+
+    return store.getState().wampConnection.session.call(endpoint, args);
 };
 
 export const subscribe = (topic, handler) => {

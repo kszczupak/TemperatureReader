@@ -12,6 +12,13 @@ class TemperatureMonitor extends Component {
                 </div>
             );
 
+        if (this.props.display === "OFF")
+            return (
+                <div>
+                    Display is off
+                </div>
+            );
+
         return (
             <div>
                 {this.props.temperature.value}
@@ -21,7 +28,8 @@ class TemperatureMonitor extends Component {
 }
 
 TemperatureMonitor.propTypes = {
-  temperature: PropTypes.object.isRequired
+    temperature: PropTypes.object.isRequired,
+    display: PropTypes.string.isRequired
 };
 
 export default TemperatureMonitor;

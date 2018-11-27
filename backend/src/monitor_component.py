@@ -1,3 +1,5 @@
+import json
+
 from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 from autobahn.wamp import auth
 
@@ -45,10 +47,12 @@ class MonitorWAMPComponent(ApplicationSession):
         print("Successfully connected to Crossbar router")
 
         def get_current_status():
-            return {
+            response = {
                 "temperature": self._temperature_monitor.temperature,
                 "display": self._temperature_monitor.display_state
             }
+
+            return json.dumps(response)
 
         self.register(get_current_status, "GET_CURRENT_STATUS")
 

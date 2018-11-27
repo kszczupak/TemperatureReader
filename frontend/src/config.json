@@ -10,6 +10,9 @@
     "topics": {
       "temperature": "TEMPERATURE_CHANGE",
       "display": "DISPLAY_CHANGE"
+    },
+    "endpoints": {
+      "currentState": "GET_CURRENT_STATUS"
     }
   }
 }

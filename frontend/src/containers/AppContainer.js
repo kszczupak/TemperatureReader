@@ -1,13 +1,14 @@
 import { connect } from 'react-redux';
 
-import { connectToWAMP, subscribeToTemperatureUpdate } from '../actions';
+import { connectToWAMP, subscribeToMonitorUpdates, getCurrentMonitorState } from '../actions';
 import App from '../components/App';
 
 const mapStateToProps = state => ({});
 
 const mapDispatchToProps = {
     initiateBackend: connectToWAMP,
-    subscribeToTemperatureUpdate
+    fetchInitialState: getCurrentMonitorState,
+    subscribeToStateUpdates: subscribeToMonitorUpdates
 };
 
 export const AppContainer = connect(

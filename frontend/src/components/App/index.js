@@ -7,13 +7,8 @@ import {TemperatureMonitorContainer} from '../../containers/TemperatureMonitorCo
 class App extends Component {
     componentDidMount() {
         this.props.initiateBackend();
-        // setTimeout(() => {
-        //     this.props.subscribeToTemperatureUpdate()
-        // },
-        //     3000
-        // );
-        this.props.subscribeToTemperatureUpdate();
-
+        this.props.fetchInitialState();
+        this.props.subscribeToStateUpdates();
     }
 
     render() {
