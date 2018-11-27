@@ -44,6 +44,14 @@ class MonitorWAMPComponent(ApplicationSession):
     async def onJoin(self, details):
         print("Successfully connected to Crossbar router")
 
+        def get_current_status():
+            return {
+                "temperature": self._temperature_monitor.temperature,
+                "display": self._temperature_monitor.display_state
+            }
+
+        self.register(get_current_status, "GET_CURRENT_STATUS")
+
         self._temperature_monitor.run(
             cycle_interval=10
         )

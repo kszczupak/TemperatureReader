@@ -34,11 +34,11 @@ class TemperatureMonitor:
             self._complete_cycle(requested_interval=cycle_interval)
 
     @property
-    def temperature(self):
+    def temperature(self) -> int:
         return self._current_temperature
 
     @temperature.setter
-    def temperature(self, new_value):
+    def temperature(self, new_value: int):
         # If temperature was read correctly it means that display is on
         self.display_state = DisplayState.ON
 
@@ -53,12 +53,12 @@ class TemperatureMonitor:
             print(f"Send new temperature on topic: {config['crossbar']['topics']['temperature']}")
 
     @property
-    def display_state(self):
-        return self._display_state
+    def display_state(self) -> str:
+        return self._display_state.name
 
     @display_state.setter
-    def display_state(self, new_state):
-        if new_state == self.display_state:
+    def display_state(self, new_state: DisplayState):
+        if new_state == self._display_state:
             # Do nothing if there is no state change
             return
 
@@ -66,7 +66,7 @@ class TemperatureMonitor:
 
         if self._session is not None:
             # This check is done to allow Monitor to work also without crossbar connected
-            self._session.publish(config['crossbar']['topics']['display'], self._display_state.name)
+            self._session.publish(config['crossbar']['topics']['display'], self.display_state)
             print(f"Send new display state on topic: {config['crossbar']['topics']['display']}")
 
     def _setup_cycle(self):
@@ -102,7 +102,7 @@ class TemperatureMonitor:
 
     def _show_stats(self):
         print(f"Last measured temperature: {self.temperature}")
-        print(f"Display state: {self.display_state.name}")
+        print(f"Display state: {self.display_state}")
         print(f"Monitor process started on {self._capture_start_date}")
         print(f"Debug mode: {self._debug_mode}")
         print(f"Invalid readings: {self._invalid_readings}")
