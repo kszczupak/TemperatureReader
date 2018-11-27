@@ -5,6 +5,7 @@ from datetime import datetime
 from src.camera import capture_image
 from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
 from src.utils import clear_terminal, print_spinning_cursor
+from src.display import DisplayState
 from config import config
 
 
@@ -13,6 +14,7 @@ class TemperatureMonitor:
         self._temperature_reader = TemperatureReader()
         self._session = session
         self._current_temperature = 0
+        self._display_state = DisplayState.OFF
         self._invalid_readings = 0
         self._cycle_start_time = None
         self._capture_start_time = None
@@ -36,12 +38,35 @@ class TemperatureMonitor:
 
     @temperature.setter
     def temperature(self, new_value):
-        # Validacja, wyslanie w wamp eventu
+        # If temperature was read correctly it means that display is on
+        self.display_state = DisplayState.ON
+
+        if new_value == self.temperature:
+            # Do nothing if there is no value change
+            return
+
         self._current_temperature = new_value
 
         if self._session is not None:
-            self._session.publish(config["crossbar"]["temperature_topic"], new_value)
-            print(f"Send new temperature on topic: {config['crossbar']['temperature_topic']}")
+            self._session.publish(config["crossbar"]["topics"]["temperature"], new_value)
+            print(f"Send new temperature on topic: {config['crossbar']['topics']['temperature']}")
+
+    @property
+    def display_state(self):
+        return self._display_state
+
+    @display_state.setter
+    def display_state(self, new_state):
+        if new_state == self.display_state:
+            # Do nothing if there is no state change
+            return
+
+        self._display_state = new_state
+
+        if self._session is not None:
+            # This check is done to allow Monitor to work also without crossbar connected
+            self._session.publish(config['crossbar']['topics']['display'], self._display_state.name)
+            print(f"Send new display state on topic: {config['crossbar']['topics']['display']}")
 
     def _setup_cycle(self):
         clear_terminal()
@@ -62,6 +87,7 @@ class TemperatureMonitor:
             print("WARNING: Could not convert current image to samples.")
             self._invalid_readings += 1
         except DisplayOffError:
+            self.display_state = DisplayState.OFF
             print("Temperature display is off. Temperature will not be updated in this cycle.")
         finally:
             os.remove(image)

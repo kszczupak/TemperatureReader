@@ -7,6 +7,9 @@
       "username": "user",
       "password": "1234"
     },
-    "topic": "TEMPERATURE_UPDATE"
+    "topics": {
+      "temperature": "TEMPERATURE_CHANGE",
+      "display": "DISPLAY_CHANGE"
+    }
   }
 }

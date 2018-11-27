@@ -9,6 +9,9 @@ config = {
         "host": "192.168.1.69",
         "port": "8080",
         "realm": "realm1",
-        "temperature_topic": "TEMPERATURE_UPDATE"
+        "topics": {
+            "temperature": "TEMPERATURE_CHANGE",
+            "display": "DISPLAY_CHANGE"
+        }
     }
 }
