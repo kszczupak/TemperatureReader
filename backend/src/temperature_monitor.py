@@ -5,7 +5,7 @@ from datetime import datetime
 
 from src.camera import capture_image
 from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
-from src.utils import clear_terminal, print_spinning_cursor
+from src.utils import clear_terminal
 from src.display import DisplayState
 from config import config
 
@@ -31,7 +31,7 @@ class TemperatureMonitor:
 
         while True:
             self._setup_cycle()
-            self._capture_and_analyse_image()
+            await self._capture_and_analyse_image()
             await self._complete_cycle(requested_interval=cycle_interval)
 
     @property
@@ -41,6 +41,7 @@ class TemperatureMonitor:
     @temperature.setter
     def temperature(self, new_value: int):
         # If temperature was read correctly it means that display is on
+        # noinspection PyAttributeOutsideInit
         self.display_state = DisplayState.ON
 
         if new_value == self.temperature:
@@ -79,8 +80,8 @@ class TemperatureMonitor:
         self._cycle_start_time = time()
         print(f"Updating temperature...")
 
-    def _capture_and_analyse_image(self):
-        image = capture_image()
+    async def _capture_and_analyse_image(self):
+        image = await capture_image()
 
         try:
             self.temperature = self._temperature_reader.get_temperature(image)
