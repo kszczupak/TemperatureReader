@@ -3,8 +3,7 @@ import { connect } from 'react-redux';
 import TemperatureMonitor from '../components/TemperatureMonitor';
 
 const mapStateToProps = state => ({
-    temperature: state.temperature,
-    display: state.display
+    monitor: state.monitor,
 });
 
 export const TemperatureMonitorContainer = connect(

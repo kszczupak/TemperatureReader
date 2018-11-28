@@ -5,14 +5,14 @@ import './index.css';
 
 class TemperatureMonitor extends Component {
     render() {
-        if (this.props.temperature.isLoading)
+        if (this.props.monitor.isLoading)
             return (
                 <div>
                     Loading...
                 </div>
             );
 
-        if (this.props.display === "OFF")
+        if (this.props.monitor.display === "OFF")
             return (
                 <div>
                     Display is off
@@ -21,15 +21,14 @@ class TemperatureMonitor extends Component {
 
         return (
             <div>
-                {this.props.temperature.value}
+                {this.props.monitor.temperature}
             </div>
         )
     }
 }
 
 TemperatureMonitor.propTypes = {
-    temperature: PropTypes.object.isRequired,
-    display: PropTypes.string.isRequired
+    monitor: PropTypes.object.isRequired,
 };
 
 export default TemperatureMonitor;

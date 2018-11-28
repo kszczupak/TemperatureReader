@@ -43,7 +43,6 @@ export const getCurrentMonitorState = () => (dispatch, getState) => {
             response => JSON.parse(response)
         ).then(
             response => {
-                console.log(`Current state: ${response}`);
                 dispatch(temperatureChange(response.temperature));
                 dispatch(displayChange(response.display))
             }

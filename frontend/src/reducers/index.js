@@ -1,11 +1,9 @@
 import { combineReducers } from 'redux';
 
-import { temperature } from './temperature';
-import {display} from './display';
+import { monitor } from './monitor';
 import { wampConnection } from './wampConnection';
 
 export default combineReducers({
-  temperature,
-  display,
+  monitor,
   wampConnection
 });
