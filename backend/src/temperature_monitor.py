@@ -1,4 +1,5 @@
 import os
+import asyncio
 from time import time
 from datetime import datetime
 
@@ -21,7 +22,7 @@ class TemperatureMonitor:
         self._capture_start_time = None
         self._capture_start_date = None
 
-    def run(self, cycle_interval=20):
+    async def run(self, cycle_interval=20):
         self._capture_start_time = time()
         self._capture_start_date = datetime.now()
         print("Starting to monitor temperature from display...")
@@ -31,7 +32,7 @@ class TemperatureMonitor:
         while True:
             self._setup_cycle()
             self._capture_and_analyse_image()
-            self._complete_cycle(requested_interval=cycle_interval)
+            await self._complete_cycle(requested_interval=cycle_interval)
 
     @property
     def temperature(self) -> int:
@@ -91,14 +92,14 @@ class TemperatureMonitor:
         finally:
             os.remove(image)
 
-    def _complete_cycle(self, requested_interval):
+    async def _complete_cycle(self, requested_interval):
         cycle_elapsed_time = time() - self._cycle_start_time
         print(f"Cycle completed. Elapsed time: {cycle_elapsed_time} [sec]")
 
         if cycle_elapsed_time < requested_interval:
             to_sleep = requested_interval - cycle_elapsed_time
             print(f"Waiting {to_sleep} [sec] to complete cycle interval...")
-            print_spinning_cursor(to_sleep)
+            await asyncio.sleep(to_sleep)
 
     def _show_stats(self):
         print(f"Last measured temperature: {self.temperature}")

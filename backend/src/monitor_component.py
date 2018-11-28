@@ -60,6 +60,6 @@ class MonitorWAMPComponent(ApplicationSession):
             config["crossbar"]["endpoints"]["current_state"]
         )
 
-        self._temperature_monitor.run(
+        await self._temperature_monitor.run(
             cycle_interval=10
         )

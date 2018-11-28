@@ -1,5 +1,6 @@
 from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 from autobahn.wamp import auth
+import asyncio
 
 from config import config
 
@@ -42,8 +43,9 @@ class FakeFrontendWAMPComponent(ApplicationSession):
         def on_temperature_change(new_value):
             print(f"Current temperature: {new_value}")
 
-        results = await self.call(config["crossbar"]["endpoints"]["current_state"])
+        self.subscribe(on_temperature_change, config["crossbar"]["temperature_topic"])
 
-        print(results)
-
-        # self.subscribe(on_temperature_change, config["crossbar"]["temperature_topic"])
+        while True:
+            results = await self.call(config["crossbar"]["endpoints"]["current_state"])
+            print(results)
+            await asyncio.sleep(15)
