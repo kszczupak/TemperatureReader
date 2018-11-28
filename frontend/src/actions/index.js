@@ -1,4 +1,4 @@
 import { subscribeToMonitorUpdates, getCurrentMonitorState } from './monitor';
-import { connectToWAMP, callRPC, subscribe } from './wampConnection';
+import { connectToWAMP, callRPC, subscribe, waitForWampReady } from './wampConnection';
 
-export { subscribeToMonitorUpdates, getCurrentMonitorState, connectToWAMP, callRPC, subscribe };
+export { waitForWampReady, subscribeToMonitorUpdates, getCurrentMonitorState, connectToWAMP, callRPC, subscribe };

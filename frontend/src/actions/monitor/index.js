@@ -1,6 +1,6 @@
 import ActionTypes from '../../constants/actionTypes';
 import config from '../../config.json';
-import {subscribe, callRPC} from '../index';
+import {subscribe, callRPC, waitForWampReady} from '../index';
 
 
 const temperatureChange = newTemperatureValue => ({
@@ -22,27 +22,31 @@ export const subscribeToMonitorUpdates = () => (dispatch, getState) => {
         dispatch(displayChange(newDisplayState))
     };
 
-    subscribe(
+    waitForWampReady( () => subscribe(
         config.crossbar.topics.temperature,
         handleTemperatureUpdate
+        )
     );
 
-    subscribe(
+    waitForWampReady(() => subscribe(
         config.crossbar.topics.display,
         handleDisplayChange
+        )
     );
 };
 
 export const getCurrentMonitorState = () => (dispatch, getState) => {
-    callRPC(
-        config.crossbar.endpoints.currentState
-    ).then(
-        response => JSON.parse(response)
-    ).then(
-        response => {
-            console.log(`Current state: ${response}`);
-            dispatch(temperatureChange(response.temperature));
-            dispatch(displayChange(response.display))
-        }
-    )
+    return waitForWampReady(() => {
+        return callRPC(
+            config.crossbar.endpoints.currentState
+        ).then(
+            response => JSON.parse(response)
+        ).then(
+            response => {
+                console.log(`Current state: ${response}`);
+                dispatch(temperatureChange(response.temperature));
+                dispatch(displayChange(response.display))
+            }
+        )
+    })
 };
