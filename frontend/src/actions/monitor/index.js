@@ -45,7 +45,6 @@ export const getCurrentMonitorState = () => (dispatch, getState) => {
         ).then(
             response => {
                 dispatch(temperatureChange(response.temperature));
-                dispatch(updateChartData(response.temperature));
                 dispatch(displayChange(response.display));
             }
         )

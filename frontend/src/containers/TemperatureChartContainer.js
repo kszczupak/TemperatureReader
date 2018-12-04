@@ -1,15 +1,17 @@
 import { connect } from 'react-redux';
 
-import { startPeriodicChartUpdates, stopPeriodicChartUpdates } from '../actions';
+import { startPeriodicChartUpdates, stopPeriodicChartUpdates, fetchInitialChartData } from '../actions';
 import TemperatureChart from '../components/TemperatureChart';
 
 const mapStateToProps = state => ({
-    data: state.chartData.toJS()
+    isLoading: state.chartData.isLoading,
+    data: state.chartData.data.toJS()
 });
 
 const mapDispatchToProps = {
     startPeriodicChartUpdates,
-    stopPeriodicChartUpdates
+    stopPeriodicChartUpdates,
+    fetchInitialChartData
 };
 
 export const TemperatureChartContainer = connect(

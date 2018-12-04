@@ -12,7 +12,12 @@
       "display": "DISPLAY_CHANGE"
     },
     "endpoints": {
-      "currentState": "GET_CURRENT_STATUS"
+      "currentState": "GET_CURRENT_STATUS",
+      "lastReadings": "GET_LAST_READINGS"
     }
+  },
+  "chart": {
+    "updateIntervalInSec": 30,
+    "dataLimit": 50
   }
 }

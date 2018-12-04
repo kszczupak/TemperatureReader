@@ -1,6 +1,6 @@
-import { subscribeToMonitorUpdates, getCurrentMonitorState } from './monitor';
-import { connectToWAMP, callRPC, subscribe, waitForWampReady } from './wampConnection';
-import {updateChartData, startPeriodicChartUpdates, stopPeriodicChartUpdates} from "./chartData";
+import {subscribeToMonitorUpdates, getCurrentMonitorState} from './monitor';
+import {connectToWAMP, callRPC, subscribe, waitForWampReady} from './wampConnection';
+import {updateChartData, startPeriodicChartUpdates, stopPeriodicChartUpdates, fetchInitialChartData} from "./chartData";
 
 export {
     waitForWampReady,
@@ -11,5 +11,6 @@ export {
     subscribe,
     updateChartData,
     startPeriodicChartUpdates,
-    stopPeriodicChartUpdates
+    stopPeriodicChartUpdates,
+    fetchInitialChartData
 };

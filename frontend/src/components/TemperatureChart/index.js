@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {PropTypes} from 'prop-types';
-import {VictoryBar, VictoryChart, VictoryAxis, VictoryTheme, VictoryStack, VictoryLine} from 'victory';
+import {VictoryChart, VictoryAxis, VictoryLine} from 'victory';
 
 import './index.css';
 
@@ -25,6 +25,7 @@ class TemperatureChart extends Component {
     };
 
     componentDidMount() {
+        this.props.fetchInitialChartData();
         this.props.startPeriodicChartUpdates();
     }
 
@@ -33,7 +34,12 @@ class TemperatureChart extends Component {
     }
 
     render() {
-        console.log(this.props.data);
+        if (this.props.isLoading)
+            return (
+                <div>
+                    Loading...
+                </div>
+            );
 
         return (
             <div className="ChartArea">
