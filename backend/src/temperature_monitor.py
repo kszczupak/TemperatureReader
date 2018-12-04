@@ -18,6 +18,7 @@ class TemperatureMonitor:
         self._current_temperature = 0
         self._display_state = DisplayState.OFF
         self._invalid_readings = 0
+        self.last_readings = list()
         self._cycle_start_time = None
         self._capture_start_time = None
         self._capture_start_date = None
@@ -50,6 +51,8 @@ class TemperatureMonitor:
 
         self._current_temperature = new_value
 
+        self._update_last_readings()
+
         if self._session is not None:
             self._session.publish(config["crossbar"]["topics"]["temperature"], new_value)
             print(f"Send new temperature on topic: {config['crossbar']['topics']['temperature']}")
@@ -70,6 +73,18 @@ class TemperatureMonitor:
             # This check is done to allow Monitor to work also without crossbar connected
             self._session.publish(config['crossbar']['topics']['display'], self.display_state)
             print(f"Send new display state on topic: {config['crossbar']['topics']['display']}")
+
+    def _update_last_readings(self):
+        new_reading = {
+            "timestamp": datetime.now().timestamp(),
+            "temperature": self.temperature
+        }
+
+        if len(self.last_readings) > 50:
+            # Keep only only 50 last temperature readings
+            self.last_readings.pop(index=0)
+
+        self.last_readings.append(new_reading)
 
     def _setup_cycle(self):
         clear_terminal()

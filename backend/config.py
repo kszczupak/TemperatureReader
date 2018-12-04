@@ -14,7 +14,8 @@ config = {
             "display": "DISPLAY_CHANGE"
         },
         "endpoints": {
-            "current_state": "GET_CURRENT_STATUS"
+            "current_state": "GET_CURRENT_STATUS",
+            "last_readings": "GET_LAST_READINGS"
         }
     }
 }

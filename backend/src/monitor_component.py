@@ -47,7 +47,6 @@ class MonitorWAMPComponent(ApplicationSession):
         print("Successfully connected to Crossbar router")
 
         def get_current_status():
-            print("Executing procedure...")
             response = {
                 "temperature": self._temperature_monitor.temperature,
                 "display": self._temperature_monitor.display_state
@@ -55,9 +54,19 @@ class MonitorWAMPComponent(ApplicationSession):
 
             return json.dumps(response)
 
+        def get_last_temperature_readings():
+            response = self._temperature_monitor.last_readings
+
+            return json.dumps(response)
+
         self.register(
             get_current_status,
             config["crossbar"]["endpoints"]["current_state"]
+        )
+
+        self.register(
+            get_last_temperature_readings,
+            config["crossbar"]["endpoints"]["last_readings"]
         )
 
         await self._temperature_monitor.run(
