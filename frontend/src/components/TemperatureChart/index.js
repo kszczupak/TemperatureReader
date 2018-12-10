@@ -7,6 +7,9 @@ import './index.css';
 
 class TemperatureChart extends Component {
     drawGridLines = y => {
+        if (y === 30)
+            return "#565550";
+
         if (y === 50)
             return "#265618";
 

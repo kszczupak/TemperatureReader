@@ -15,7 +15,6 @@ const initialState = {
  * @returns {Immutable.List<any>} Parsed chart data (with update interval from config)
  */
 const initializeChartData = rawData => {
-    // console.log(JSON.stringify(rawData));
     let chartData = [];
     // let currentIndex = config.chart.dataLimit;
     let currentIndex = rawData.length - 1;
@@ -34,7 +33,6 @@ const initializeChartData = rawData => {
         previousReading = parseRawReading(rawData[currentIndex]);
         let currentTimeDifference = currentChartSample.x - previousReading.x;
         currentTimeDifference /= 1000;  // ms -> sec
-        console.log(currentTimeDifference);
 
         if (currentTimeDifference < config.chart.updateIntervalInSec){
             // Reading occurred faster than update interval
@@ -55,8 +53,6 @@ const initializeChartData = rawData => {
 
         chartData.push(currentChartSample);
     }
-
-    console.log(`Last index: ${currentIndex}`);
 
     return List(chartData.reverse());
 };
