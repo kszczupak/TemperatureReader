@@ -3,13 +3,24 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 
-import { store } from './store';
-import { Provider } from 'react-redux';
-import { AppContainer } from './containers/AppContainer';
+import {store} from './store';
+import {Provider} from 'react-redux';
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+
+import {AppContainer} from './containers/AppContainer';
+
+
+const theme = createMuiTheme({
+    palette: {
+        type: 'dark',
+    },
+});
 
 ReactDOM.render(
     <Provider store={store}>
-        <AppContainer />
+        <MuiThemeProvider theme={theme}>
+            <AppContainer/>
+        </MuiThemeProvider>
     </Provider>,
     document.getElementById('root'));
 

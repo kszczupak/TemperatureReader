@@ -15,6 +15,7 @@
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
+    "typeface-roboto": "0.0.54",
     "victory": "^31.0.1"
   },
   "scripts": {

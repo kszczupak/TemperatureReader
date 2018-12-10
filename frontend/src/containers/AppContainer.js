@@ -1,14 +1,17 @@
 import { connect } from 'react-redux';
 
-import { connectToWAMP, subscribeToMonitorUpdates, getCurrentMonitorState } from '../actions';
+import {connectToWAMP, subscribeToMonitorUpdates, getCurrentMonitorState, fetchInitialChartData} from '../actions';
 import App from '../components/App';
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+    isLoading: state.monitor.isLoading
+});
 
 const mapDispatchToProps = {
     initiateBackend: connectToWAMP,
     fetchInitialState: getCurrentMonitorState,
-    subscribeToStateUpdates: subscribeToMonitorUpdates
+    subscribeToStateUpdates: subscribeToMonitorUpdates,
+    fetchInitialChartData
 };
 
 export const AppContainer = connect(

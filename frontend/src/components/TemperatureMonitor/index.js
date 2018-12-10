@@ -1,17 +1,11 @@
 import React, {Component} from 'react';
 import { PropTypes } from 'prop-types';
+import Typography from '@material-ui/core/Typography';
 
 import './index.css';
 
 class TemperatureMonitor extends Component {
     render() {
-        if (this.props.monitor.isLoading)
-            return (
-                <div>
-                    Loading...
-                </div>
-            );
-
         if (this.props.monitor.display === "OFF")
             return (
                 <div>
@@ -20,9 +14,9 @@ class TemperatureMonitor extends Component {
             );
 
         return (
-            <div>
+            <Typography variant="headline" align="center">
                 {this.props.monitor.temperature}
-            </div>
+            </Typography>
         )
     }
 }

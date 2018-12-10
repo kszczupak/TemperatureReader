@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {PropTypes} from 'prop-types';
 import {VictoryChart, VictoryAxis, VictoryLine, VictoryTooltip, VictoryVoronoiContainer} from 'victory';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Typography from "@material-ui/core/es/Typography/Typography";
 
 import './index.css';
 
@@ -28,7 +30,6 @@ class TemperatureChart extends Component {
     };
 
     componentDidMount() {
-        this.props.fetchInitialChartData();
         this.props.startPeriodicChartUpdates();
     }
 
@@ -40,7 +41,10 @@ class TemperatureChart extends Component {
         if (this.props.isLoading)
             return (
                 <div>
-                    Loading...
+                    <CircularProgress />
+                    <Typography>
+                        Loading chart...
+                    </Typography>
                 </div>
             );
 
