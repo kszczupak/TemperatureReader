@@ -16,29 +16,35 @@ const initialState = {
  */
 const initializeChartData = rawData => {
     let chartData = [];
-    let currentIndex = 0;
-    let nextReading = null;
+    let currentIndex = config.chart.dataLimit;
+    let previousReading = null;
+    // rawData.reverse();  // Reverse to obtain most recent samples
+
     let currentChartSample = parseRawReading(rawData[currentIndex]);
+    currentChartSample = {
+        ...currentChartSample,
+        x: new Date()
+    };
     chartData.push(currentChartSample);
-    currentIndex++;
+    currentIndex--;
 
     while (chartData.length < config.chart.dataLimit) {
-        nextReading = parseRawReading(currentIndex);
-        let currentTimeDifference = nextReading.x - currentChartSample.x;
+        previousReading = parseRawReading(rawData[currentIndex]);
+        let currentTimeDifference = currentChartSample.x - previousReading.x;
         currentTimeDifference /= 1000;  // ms -> sec
 
         if (currentTimeDifference < config.chart.updateIntervalInSec){
             // Reading occurred faster than update interval
             // Need to include this reading and advance in raw reading data
-            currentChartSample = nextReading;
-            currentIndex++;
+            currentChartSample = previousReading;
+            currentIndex--;
         }
         else {
             // Need to create new sample with same temperature as previously
             // But with added chart chart interval to time value
             currentChartSample = {
                 x: new Date(
-                    currentChartSample.x.getTime() + config.chart.updateIntervalInSec * 1000
+                    currentChartSample.x.getTime() - config.chart.updateIntervalInSec * 1000
                 ),
                 y: currentChartSample.y
             };
@@ -47,16 +53,18 @@ const initializeChartData = rawData => {
         chartData.push(currentChartSample);
     }
 
-    return List(chartData);
+    return List(chartData.reverse());
 };
 
 const parseRawReading = rawReading => ({
-    x: new Date(rawReading.timestamp),
+    x: new Date(rawReading.timestamp * 1000),
     y: rawReading.temperature
 });
 
 const updateChartData = (newPoint, oldData) => {
     const tempData = oldData.delete(0);
+
+    // console.log(tempData.push(newPoint).toJS());
 
     return tempData.push(newPoint);
 };
