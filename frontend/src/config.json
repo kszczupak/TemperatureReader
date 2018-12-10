@@ -17,7 +17,7 @@
     }
   },
   "chart": {
-    "updateIntervalInSec": 30,
+    "updateIntervalInSec": 180,
     "dataLimit": 50
   }
 }

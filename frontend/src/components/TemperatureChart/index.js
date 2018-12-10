@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {PropTypes} from 'prop-types';
-import {VictoryChart, VictoryAxis, VictoryLine} from 'victory';
+import {VictoryChart, VictoryAxis, VictoryLine, VictoryTooltip, VictoryVoronoiContainer} from 'victory';
 
 import './index.css';
 
@@ -50,6 +50,7 @@ class TemperatureChart extends Component {
                         top: 50,
                         bottom: 70
                     }}
+                    containerComponent={<VictoryVoronoiContainer/>}
                 >
                     <VictoryAxis
                         style={{
@@ -87,6 +88,8 @@ class TemperatureChart extends Component {
                         label="Temperature"
                     />
                     <VictoryLine
+                        labels={(d) => `Temperature: ${d.y}\nTime: ${d.x.toLocaleTimeString()}`}
+                        labelComponent={<VictoryTooltip/>}
                         data={this.props.data}
                     />
                 </VictoryChart>
