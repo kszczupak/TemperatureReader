@@ -42,9 +42,6 @@ class TemperatureChart extends Component {
             return (
                 <div>
                     <CircularProgress />
-                    <Typography>
-                        Loading chart...
-                    </Typography>
                 </div>
             );
 
