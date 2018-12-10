@@ -51,6 +51,7 @@ class TemperatureChart extends Component {
                         bottom: 70
                     }}
                     containerComponent={<VictoryVoronoiContainer/>}
+                    animate={{duration: 500}}
                 >
                     <VictoryAxis
                         style={{
