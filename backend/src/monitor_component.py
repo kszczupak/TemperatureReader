@@ -1,7 +1,6 @@
 import json
 
-from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
-from autobahn.wamp import auth
+from autobahn.asyncio.component import Component, run
 
 from config import config
 from src.temperature_monitor import TemperatureMonitor
@@ -12,63 +11,47 @@ class MonitorComponent:
     def run(cls):
         print(f"Starting {cls.__name__}...")
 
-        url = f"ws://{config['crossbar']['host']}:{config['crossbar']['port']}/ws"
-
-        runner = ApplicationRunner(url=url, realm=config["crossbar"]["realm"])
-        runner.run(MonitorWAMPComponent)
+        run([component])
 
 
-class MonitorWAMPComponent(ApplicationSession):
-    def __init__(self, c=None):
-        super().__init__(c)
-        self._temperature_monitor = TemperatureMonitor(
-            session=self,
-            debug=False     # Do not save bad readings
-        )
+component = Component(
+    transports=f"ws://{config['crossbar']['host']}:{config['crossbar']['port']}/ws",
+    realm=config["crossbar"]["realm"]
+)
 
-    # TODO add authentication (here and in router configuration)
-    def onConnect(self):
-        print("Connected to Crossbar!")
 
-        # Temporary connect without authentication
-        self.join(config["crossbar"]["realm"])
-        # self.join(config["crossbar"]["realm"], ["wampcra"], config["crossbar"]["auth"]["username"])
+@component.on_join
+async def join(session, details):
+    print("Successfully connected to Crossbar router")
 
-    def onDisconnect(self):
-        print("Disconnected from Crossbar!")
+    temperature_monitor = TemperatureMonitor(
+        session=session,
+        debug=False  # Do not save bad readings
+    )
 
-    # def onChallenge(self, challenge):
-    #     secret = config["crossbar"]["auth"]["password"]
-    #     signature = auth.compute_wcs(secret.encode('utf8'), challenge.extra['challenge'].encode('utf8'))
-    #
-    #     return signature.decode('ascii')
+    def get_current_status():
+        response = {
+            "temperature": temperature_monitor.temperature,
+            "display": temperature_monitor.display_state
+        }
 
-    async def onJoin(self, details):
-        print("Successfully connected to Crossbar router")
+        return json.dumps(response)
 
-        def get_current_status():
-            response = {
-                "temperature": self._temperature_monitor.temperature,
-                "display": self._temperature_monitor.display_state
-            }
+    def get_last_temperature_readings():
+        response = list(temperature_monitor.last_readings)
 
-            return json.dumps(response)
+        return json.dumps(response)
 
-        def get_last_temperature_readings():
-            response = list(self._temperature_monitor.last_readings)
+    session.register(
+        get_current_status,
+        config["crossbar"]["endpoints"]["current_state"]
+    )
 
-            return json.dumps(response)
+    session.register(
+        get_last_temperature_readings,
+        config["crossbar"]["endpoints"]["last_readings"]
+    )
 
-        self.register(
-            get_current_status,
-            config["crossbar"]["endpoints"]["current_state"]
-        )
-
-        self.register(
-            get_last_temperature_readings,
-            config["crossbar"]["endpoints"]["last_readings"]
-        )
-
-        await self._temperature_monitor.run(
-            cycle_interval=10
-        )
+    await temperature_monitor.run(
+        cycle_interval=10
+    )
