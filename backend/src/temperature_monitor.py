@@ -2,6 +2,7 @@ import os
 import asyncio
 from time import time
 from datetime import datetime
+from collections import deque
 
 from src.camera import capture_image
 from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
@@ -18,7 +19,7 @@ class TemperatureMonitor:
         self._current_temperature = 0
         self._display_state = DisplayState.OFF
         self._invalid_readings = 0
-        self.last_readings = list()
+        self.last_readings = deque()
         self._cycle_start_time = None
         self._capture_start_time = None
         self._capture_start_date = None
@@ -82,7 +83,7 @@ class TemperatureMonitor:
 
         if len(self.last_readings) > 50:
             # Keep only only 50 last temperature readings
-            self.last_readings.pop(index=0)
+            self.last_readings.popleft()
 
         self.last_readings.append(new_reading)
 

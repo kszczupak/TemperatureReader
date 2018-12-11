@@ -55,7 +55,7 @@ class MonitorWAMPComponent(ApplicationSession):
             return json.dumps(response)
 
         def get_last_temperature_readings():
-            response = self._temperature_monitor.last_readings
+            response = list(self._temperature_monitor.last_readings)
 
             return json.dumps(response)
 
