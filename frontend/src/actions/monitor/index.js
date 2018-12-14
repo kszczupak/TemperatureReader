@@ -13,10 +13,12 @@ const displayChange = newDisplayState => ({
     newDisplayState
 });
 
-export const subscribeToMonitorUpdates = () => (dispatch, getState) => {
-    const handleTemperatureUpdate = newTemperatureValue => {
-        dispatch(temperatureChange(newTemperatureValue));
-        dispatch(updateChartData(newTemperatureValue));
+export const subscribeToMonitorUpdates = () => (dispatch) => {
+    const handleTemperatureUpdate = rawTemperature => {
+        const parsedTemperature = JSON.parse(rawTemperature);
+
+        dispatch(temperatureChange(parsedTemperature));
+        dispatch(updateChartData(parsedTemperature));
     };
 
     const handleDisplayChange = newDisplayState => {
@@ -36,7 +38,7 @@ export const subscribeToMonitorUpdates = () => (dispatch, getState) => {
     );
 };
 
-export const getCurrentMonitorState = () => (dispatch, getState) => {
+export const getCurrentMonitorState = () => (dispatch) => {
     return waitForWampReady(() => {
         return callRPC(
             config.crossbar.endpoints.currentState

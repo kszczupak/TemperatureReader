@@ -21,7 +21,7 @@ class App extends Component {
             return (
                 <div>
                     <CircularProgress />
-                    <Typography>
+                    <Typography variant="body1">
                         Loading Temperature...
                     </Typography>
                 </div>

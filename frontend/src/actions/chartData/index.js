@@ -28,7 +28,7 @@ export const stopPeriodicChartUpdates = () => () => {
     clearInterval(chartUpdatesInterval);
 };
 
-export const fetchInitialChartData = () => (dispatch, getState) => {
+export const fetchInitialChartData = () => (dispatch) => {
     return waitForWampReady(() => {
         return callRPC(
             config.crossbar.endpoints.lastReadings
