@@ -16,33 +16,36 @@ const initialState = {
  */
 const initializeChartData = rawData => {
     let chartData = [];
-    // let currentIndex = config.chart.dataLimit;
-    let currentIndex = rawData.length - 1;
-    let previousReading = null;
-    // rawData.reverse();  // Reverse to obtain most recent samples
+    let readingIndex = rawData.length - 1;
+    let currentReading = parseRawReading(rawData[readingIndex]);
 
-    let currentChartSample = parseRawReading(rawData[currentIndex]);
-    currentChartSample = {
-        ...currentChartSample,
+    // First chart sample will contain last temperature value and current time
+    let currentChartSample = {
+        ...currentReading,
         x: new Date()
     };
     chartData.push(currentChartSample);
-    currentIndex--;
 
-    while (chartData.length < config.chart.dataLimit && currentIndex >= 0) {
-        previousReading = parseRawReading(rawData[currentIndex]);
-        let currentTimeDifference = currentChartSample.x - previousReading.x;
-        currentTimeDifference /= 1000;  // ms -> sec
+    // This loop will build chart data (in reverse order)
+    // If samples interval (from config) is less than time between consecutive reading,
+    // readings will be filled with same temperature value.
+    while (chartData.length < config.chart.dataLimit && readingIndex >= 0) {
+        let samplesTimeDifference = currentChartSample.x - currentReading.x;
+        samplesTimeDifference /= 1000;  // ms -> sec
 
-        if (currentTimeDifference < config.chart.updateIntervalInSec){
+        if (samplesTimeDifference < config.chart.updateIntervalInSec) {
             // Reading occurred faster than update interval
             // Need to include this reading and advance in raw reading data
-            currentChartSample = previousReading;
-            currentIndex--;
-        }
-        else {
+            currentChartSample = currentReading;    // Take event time from reading
+            readingIndex--;                         // Advance in reading data
+            currentReading = parseRawReading(rawData[readingIndex]);
+            currentChartSample = {
+                ...currentChartSample,
+                y: currentReading.y                 // Take temperature from next reading
+            };
+        } else {
             // Need to create new sample with same temperature as previously
-            // But with added chart chart interval to time value
+            // But with subtracted chart chart interval to time value
             currentChartSample = {
                 ...currentChartSample,
                 x: new Date(
