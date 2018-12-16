@@ -14,7 +14,7 @@ class TemperatureChart extends Component {
             return "#265618";
 
         if (y === 60)
-            return "#561314";
+            return "#791415";
     };
 
     getTickValues = () => {
@@ -91,6 +91,9 @@ class TemperatureChart extends Component {
                         label="Temperature"
                     />
                     <VictoryLine
+                        style={{
+                            data: { stroke: "#b4b4b4" },
+                        }}
                         labels={(d) => `Temperature: ${d.y}\nTime: ${d.x.toLocaleTimeString()}`}
                         labelComponent={<VictoryTooltip/>}
                         data={this.props.data}
