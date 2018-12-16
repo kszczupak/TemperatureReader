@@ -96,6 +96,7 @@ class TemperatureChart extends Component {
                         }}
                         labels={(d) => `Temperature: ${d.y}\nTime: ${d.x.toLocaleTimeString()}`}
                         labelComponent={<VictoryTooltip/>}
+                        interpolation="stepBefore"
                         data={this.props.data}
                     />
                 </VictoryChart>
