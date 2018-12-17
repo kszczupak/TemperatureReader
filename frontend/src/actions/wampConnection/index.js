@@ -2,7 +2,7 @@ import autobahn from 'autobahn';
 
 import ActionTypes from '../../constants/actionTypes';
 import config from '../../config.json';
-import {store} from '../../store'
+import {store} from '../../store';
 
 const connectionInitiated = () => ({
   type: ActionTypes.WAMP_CONNECTION_INITIATED

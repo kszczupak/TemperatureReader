@@ -1,7 +1,7 @@
 import ActionTypes from '../../constants/actionTypes';
 import config from '../../config.json';
 import {subscribe, callRPC, waitForWampReady} from '../index';
-import {updateChartData} from "../index";
+import {updateChartData, resetCurrentChartUpdate} from "../index";
 
 const temperatureChange = newTemperatureValue => ({
     type: ActionTypes.TEMPERATURE_CHANGE,
@@ -19,6 +19,7 @@ export const subscribeToMonitorUpdates = () => (dispatch) => {
 
         dispatch(temperatureChange(parsedTemperature));
         dispatch(updateChartData(parsedTemperature));
+        resetCurrentChartUpdate();
     };
 
     const handleDisplayChange = newDisplayState => {
