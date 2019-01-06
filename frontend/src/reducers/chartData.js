@@ -29,7 +29,7 @@ const initializeChartData = rawData => {
     // This loop will build chart data (in reverse order)
     // If samples interval (from config) is less than time between consecutive reading,
     // readings will be filled with same temperature value.
-    while (chartData.length < config.chart.dataLimit && readingIndex >= 0) {
+    while (chartData.length < config.chart.dataLimit) {
         let samplesTimeDifference = currentChartSample.x - currentReading.x;
         samplesTimeDifference /= 1000;  // ms -> sec
 
@@ -38,6 +38,7 @@ const initializeChartData = rawData => {
             // Need to include this reading and advance in raw reading data
             currentChartSample = currentReading;    // Take event time from reading
             readingIndex--;                         // Advance in reading data
+            if (readingIndex < 0) break;
             currentReading = parseRawReading(rawData[readingIndex]);
             currentChartSample = {
                 ...currentChartSample,
