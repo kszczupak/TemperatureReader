@@ -67,7 +67,8 @@ const parseRawReading = rawReading => ({
 });
 
 const updateChartData = (newPoint, oldData) => {
-    const tempData = oldData.delete(0);
+    let tempData = oldData;
+    if (oldData.length >= config.chart.dataLimit) tempData = oldData.delete(0);
 
     return tempData.push(newPoint);
 };
