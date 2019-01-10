@@ -6,7 +6,6 @@ from collections import deque
 
 from src.camera import capture_image
 from src.temperature_reader import TemperatureReader, DisplayOffError, ImageProcessingError
-from src.utils import clear_terminal
 from src.display import DisplayState
 from config import config
 
@@ -88,10 +87,6 @@ class TemperatureMonitor:
         self.last_readings.append(new_reading)
 
     def _setup_cycle(self):
-        clear_terminal()
-        if self._session is not None:
-            print("Connected to Crossbar")
-
         self._show_stats()
         self._cycle_start_time = time()
         print(f"Updating temperature...")
