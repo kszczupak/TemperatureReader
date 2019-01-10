@@ -19,7 +19,7 @@
 #
 
 [Unit]
-Description=Crossbar Router
+Description=Frontend for Boiler Temperature Monitor
 # This service should be started AFTER crossbar is up (assuming crossbar router is running on the same server as this service)
 After=network.target crossbar.service
 
