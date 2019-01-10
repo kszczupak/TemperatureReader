@@ -1,0 +1,32 @@
+# This file is a Linux service definition, intended to work with systemctl and systemd
+# Enabling this service will start it on system boot
+#
+# To enable service:
+# 	1. Create symlik to this file from /etc/systemd/system:
+#		sudo ln -s /home/[User]/Projects/TemperatureReader/frontend/bin/crossbar.service /etc/systemd/system/crossbar.service
+#	2. Enable service in systemctl:
+#		sudo systemctl enable crossbar.service
+#	3. From now, service is scheduled to start at next boot. To start service now, either reboot the system or use:
+#		sudo systemctl start crossbar.service
+#
+# To see status of this service:
+#	systemctl status crossbar.service
+#
+# To see live output of this service:
+#	journalctl -f -u crossbar.service
+#
+
+[Unit]
+Description=Crossbar Router
+After=network.target
+
+[Service]
+ExecStart=/home/krzysiek/miniconda3/bin/crossbar start
+WorkingDirectory=/home/krzysiek/crossbar_router
+StandardOutput=journal
+StandardError=journal
+Restart=always
+User=krzysiek
+
+[Install]
+WantedBy=multi-user.target

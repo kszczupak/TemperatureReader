@@ -1,0 +1,39 @@
+# This file is a Linux service definition, intended to work with systemctl and systemd
+# Enabling this service will start it on system boot
+#
+# To enable service:
+# 	1. Create symlik to this file from /etc/systemd/system:
+#		sudo ln -s /home/pi/Projects/TemperatureReader/backend/bin/temperature_monitor_backend.service /etc/systemd/system/temperature_monitor_backend.service
+#	2. Enable service in systemctl:
+#		sudo systemctl enable temperature_monitor_backend.service
+#	3. From now, service is scheduled to start at next boot. To start service now, either reboot the system or use:
+#		sudo systemctl start temperature_monitor_backend.service
+#
+# To see status of this service:
+#	systemctl status temperature_monitor_backend.service
+#
+# To see live output of this service:
+#	journalctl -f -u temperature_monitor_backend
+#
+
+[Unit]
+Description=Backend for Boiler Temperature Monitor
+After=network.target
+
+[Service]
+# This will delay start-up of service by 90 sec. Main reason to do this is to wait for crossbar router to be up and running
+# in case of power loss (assuming crossbar router is running on the other machine; if not crossbar.service could 
+# be added to After in Unit section)
+# Delay could be also accomplished using .timer which controls this unit (this would be more elegant yet complicated solution)
+ExecStartPre=/bin/sleep 90
+# Start from conda virtual environment named TemperatureReader
+# Note that -u flag (unbuffered output) is crucial to correctly see python output using journalctl
+ExecStart=/home/pi/berryconda3/envs/TemperatureReader/bin/python -u start_monitor_component.py
+WorkingDirectory=/home/pi/Projects/TemperatureReader/backend
+StandardOutput=journal
+StandardError=journal
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

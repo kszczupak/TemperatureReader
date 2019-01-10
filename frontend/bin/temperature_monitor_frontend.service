@@ -1,0 +1,35 @@
+# This file is a Linux service definition, intended to work with systemctl and systemd
+# Enabling this service will start it on system boot
+#
+# To enable service:
+#	1. First build react app using (assuming you are in .../TemperatureReader/frontend dir)
+#		sudo npm run build
+# 	1. Create symlik to this file from /etc/systemd/system:
+#		sudo ln -s /home/[User]/Projects/TemperatureReader/frontend/bin/temperature_monitor_frontend.service /etc/systemd/system/temperature_monitor_frontend.service
+#	2. Enable service in systemctl:
+#		sudo systemctl enable temperature_monitor_frontend.service
+#	3. From now, service is scheduled to start at next boot. To start service now, either reboot the system or use:
+#		sudo systemctl start temperature_monitor_frontend.service
+#
+# To see status of this service:
+#	systemctl status temperature_monitor_frontend.service
+#
+# To see live output of this service:
+#	journalctl -f -u temperature_monitor_frontend
+#
+
+[Unit]
+Description=Crossbar Router
+# This service should be started AFTER crossbar is up (assuming crossbar router is running on the same server as this service)
+After=network.target crossbar.service
+
+[Service]
+ExecStart=/usr/bin/serve -s build
+WorkingDirectory=/home/krzysiek/Projects/TemperatureReader/frontend
+StandardOutput=journal
+StandardError=journal
+Restart=always
+User=krzysiek
+
+[Install]
+WantedBy=multi-user.target
