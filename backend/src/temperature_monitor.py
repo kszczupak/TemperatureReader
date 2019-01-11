@@ -20,15 +20,11 @@ class TemperatureMonitor:
         self._invalid_readings = 0
         self.last_readings = deque()
         self._cycle_start_time = None
-        self._capture_start_time = None
-        self._capture_start_date = None
 
     async def run(self, cycle_interval=20):
-        self._capture_start_time = time()
-        self._capture_start_date = datetime.now()
-        print("Starting to monitor temperature from display...")
-        print("Start time:")
-        print(datetime.now())
+        print(f"Monitor process started on {datetime.now()}")
+        print(f"Requested pooling interval: {cycle_interval} [sec]")
+        print(f"Debug mode: {self._debug_mode}")
 
         while True:
             self._setup_cycle()
@@ -52,10 +48,10 @@ class TemperatureMonitor:
         self._current_temperature = new_value
 
         self._update_last_readings()
+        print(f"Temperature: {new_value}")
 
         if self._session is not None:
             self._session.publish(config["crossbar"]["topics"]["temperature"], new_value)
-            print(f"Send new temperature on topic: {config['crossbar']['topics']['temperature']}")
 
     @property
     def display_state(self) -> str:
@@ -68,11 +64,11 @@ class TemperatureMonitor:
             return
 
         self._display_state = new_state
+        print(f"Display: {self.display_state}")
 
         if self._session is not None:
             # This check is done to allow Monitor to work also without crossbar connected
             self._session.publish(config['crossbar']['topics']['display'], self.display_state)
-            print(f"Send new display state on topic: {config['crossbar']['topics']['display']}")
 
     def _update_last_readings(self):
         new_reading = {
@@ -87,9 +83,7 @@ class TemperatureMonitor:
         self.last_readings.append(new_reading)
 
     def _setup_cycle(self):
-        self._show_stats()
         self._cycle_start_time = time()
-        print(f"Updating temperature...")
 
     async def _capture_and_analyse_image(self):
         image = await capture_image()
@@ -106,16 +100,7 @@ class TemperatureMonitor:
 
     async def _complete_cycle(self, requested_interval):
         cycle_elapsed_time = time() - self._cycle_start_time
-        print(f"Cycle completed. Elapsed time: {cycle_elapsed_time} [sec]")
 
         if cycle_elapsed_time < requested_interval:
             to_sleep = requested_interval - cycle_elapsed_time
-            print(f"Waiting {to_sleep} [sec] to complete cycle interval...")
             await asyncio.sleep(to_sleep)
-
-    def _show_stats(self):
-        print(f"Last measured temperature: {self.temperature}")
-        print(f"Display state: {self.display_state}")
-        print(f"Monitor process started on {self._capture_start_date}")
-        print(f"Debug mode: {self._debug_mode}")
-        print(f"Invalid readings: {self._invalid_readings}")
