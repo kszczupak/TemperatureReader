@@ -94,10 +94,10 @@ class TemperatureMonitor:
             print("WARNING: Could not convert current image to samples.")
             self._invalid_readings += 1
         except ValueError:
-        	# Sometimes PIL throws strange error about issue with processing current image
-        	# Easiest workaround is to reboot system. This situation occurs every ~10 days,
-        	# so reboot is acceptable solution.
-			print("PIL error encountered - rebooting system...") 
+            # Sometimes PIL throws strange error about issue with processing current image
+            # Easiest workaround is to reboot system. This situation occurs every ~10 days,
+            # so reboot is acceptable solution.
+            print("PIL error encountered - rebooting system...")
             os.system("sudo reboot")
         except DisplayOffError:
             self.display_state = DisplayState.OFF
