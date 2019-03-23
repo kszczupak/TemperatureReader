@@ -21,7 +21,7 @@ Description=Crossbar Router
 After=network.target
 
 [Service]
-ExecStart=/home/krzysiek/miniconda3/bin/crossbar start
+ExecStart=/snap/bin/crossbar start
 WorkingDirectory=/home/krzysiek/crossbar_router
 StandardOutput=journal
 StandardError=journal
