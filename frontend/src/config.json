@@ -1,6 +1,6 @@
 {
   "crossbar": {
-    "host": "192.168.1.69",
+    "host": "192.168.1.97",
     "port": 8080,
     "realm": "realm1",
     "auth": {
