@@ -24,7 +24,7 @@ Description=Frontend for Boiler Temperature Monitor
 After=network.target crossbar.service
 
 [Service]
-ExecStart=/usr/bin/serve -s build
+ExecStart=/usr/local/bin/serve -s build
 WorkingDirectory=/home/krzysiek/Projects/TemperatureReader/frontend
 StandardOutput=journal
 StandardError=journal
